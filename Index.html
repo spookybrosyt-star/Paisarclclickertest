@@ -3,333 +3,936 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paiser Clicker: Complete</title>
+    <title>Paiser Clicker: Void Expansion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
         :root {
-            --bg-app: #0f172a;
-            --bg-panel: #1e293b;
-            --bg-input: #334155;
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --accent: #6366f1;
-            --success: #10b981;
-            --danger: #ef4444;
-            --flux: #06b6d4;
-            --border: #334155;
+            --bg-dark: #0f0f13;
+            --bg-panel: rgba(30, 30, 35, 0.7);
+            --primary: #8b5cf6; /* Violet */
+            --primary-glow: rgba(139, 92, 246, 0.5);
+            --secondary: #10b981; /* Emerald */
+            --accent: #f43f5e; /* Rose */
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --radius: 16px;
         }
 
         body.true-ascension-mode {
-            --bg-app: #1a0505;
-            --bg-panel: #2b0a0a;
-            --accent: #dc2626;
-            --flux: #ef4444;
+            --bg-dark: #1a0505;
+            --primary: #ef4444;
+            --primary-glow: rgba(239, 68, 68, 0.5);
+            --secondary: #f59e0b;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-app); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
+        * { box-sizing: border-box; }
 
-        /* Sidebar */
-        .sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 25px; gap: 20px; }
-        .brand { font-size: 1.5rem; font-weight: 800; } .brand span { color: var(--accent); }
-        .stats-box { background: var(--bg-input); padding: 15px; border-radius: 10px; }
-        .stat-val { font-size: 1.4rem; font-weight: 700; }
-        .clicker-container { flex: 1; display: flex; align-items: center; justify-content: center; }
-        #click-btn { width: 150px; height: 150px; border-radius: 50%; border: 4px solid var(--accent); background: radial-gradient(circle at 30% 30%, #333, #000); color: white; font-weight: 800; cursor: pointer; transition: 0.1s; }
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 0%, #2e1065 0%, var(--bg-dark) 60%);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden; /* Custom scrolling within panels */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 1.5s ease;
+        }
+
+        /* Canvas Background for Particles */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* --- Header --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            border-bottom: var(--glass-border);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-weight: 900; font-size: 1.5rem; letter-spacing: -0.5px; text-transform: uppercase; }
+        .header-controls button {
+            background: transparent;
+            border: var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+        }
+        .header-controls button:hover { color: var(--text-main); border-color: var(--primary); background: rgba(255,255,255,0.05); }
+
+        /* --- Main Layout --- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            height: calc(100vh - 70px);
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border: var(--glass-border);
+            border-radius: var(--radius);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        /* --- Left Panel (Skills & Stats) --- */
+        .stats-container { padding: 20px; font-family: 'Roboto Mono', monospace; font-size: 0.85rem; color: var(--text-muted); }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .stat-val { color: var(--text-main); font-weight: bold; }
+
+        .skills-section { padding: 20px; border-top: var(--glass-border); flex: 1; overflow-y: auto; }
+        .skill-card {
+            background: rgba(255,255,255,0.03);
+            border: var(--glass-border);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .skill-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+        .skill-card.cooldown { opacity: 0.6; cursor: not-allowed; filter: grayscale(1); }
+        .skill-progress {
+            position: absolute; bottom: 0; left: 0; height: 3px; background: var(--primary); width: 0%; transition: width 0.1s linear;
+        }
+        .skill-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 4px; }
+        .skill-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* --- Center Panel (Game Area) --- */
+        .center-panel { align-items: center; justify-content: center; text-align: center; position: relative; }
+        
+        #score-display {
+            font-size: 3.5rem; font-weight: 900; margin: 0;
+            background: linear-gradient(to bottom, #fff, #ccc);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .currency-label { font-size: 1rem; color: var(--primary); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+
+        #click-btn {
+            width: 220px; height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4c1d95, #2e1065);
+            border: 4px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 50px var(--primary-glow), inset 0 0 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+            z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem;
+        }
+        body.true-ascension-mode #click-btn { background: radial-gradient(circle at 30% 30%, #991b1b, #450a0a); border-color: #ef4444; }
+        
         #click-btn:active { transform: scale(0.95); }
+        #click-btn::after { content:'🖱️'; filter: drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
 
-        /* Main */
-        .main-view { flex: 1; padding: 30px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; grid-auto-rows: min-content; }
+        /* Floating Text Animation */
+        .float-text {
+            position: absolute; pointer-events: none;
+            color: #fff; font-weight: bold; font-size: 1.2rem;
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+        }
+
+        /* --- Right Panel (Upgrades) --- */
+        .tabs { display: flex; padding: 10px; gap: 10px; border-bottom: var(--glass-border); }
+        .tab-btn {
+            flex: 1; background: rgba(0,0,0,0.2); border: none; color: var(--text-muted);
+            padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 700; transition: 0.2s;
+        }
+        .tab-btn.active { background: var(--primary); color: #fff; box-shadow: 0 4px 12px var(--primary-glow); }
+
+        .upgrades-list { flex: 1; overflow-y: auto; padding: 15px; }
         
-        .card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
-        .card-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; font-weight: 700; }
-        
-        /* Upgrade Lists */
-        .upgrade-list { max-height: 300px; overflow-y: auto; }
-        .upgrade-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px; margin-bottom: 8px; border-radius: 6px; }
-        .btn-buy { background: var(--bg-input); color: #aaa; border: none; padding: 6px 12px; border-radius: 4px; cursor: not-allowed; min-width: 70px; }
-        .btn-buy.afford { background: var(--accent); color: white; cursor: pointer; }
+        .upgrade-card {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 12px; border-radius: 12px; margin-bottom: 8px;
+            transition: 0.2s;
+        }
+        .upgrade-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.2); }
+        .upgrade-card.can-buy { border-left: 3px solid var(--primary); }
+        .upgrade-icon { font-size: 1.5rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 8px; }
+        .upgrade-details { flex: 1; }
+        .upgrade-name { font-weight: 700; font-size: 0.95rem; color: var(--text-main); }
+        .upgrade-cost { font-size: 0.8rem; color: var(--primary); font-family: 'Roboto Mono'; }
+        .upgrade-desc { font-size: 0.75rem; color: var(--text-muted); }
+        .upgrade-count { background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
 
-        /* Special Styles */
-        #flux-card.active { border-color: var(--flux); box-shadow: 0 0 15px rgba(6,182,212,0.1); }
-        .toggle-btn { width: 100%; padding: 10px; background: transparent; border: 1px solid var(--flux); color: var(--flux); cursor: pointer; border-radius: 6px; margin-bottom: 10px; }
-        .toggle-btn.active { background: var(--flux); color: black; }
+        /* --- Modals & Special UI --- */
+        .modal-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
+        .modal {
+            background: #18181b; border: 1px solid var(--primary);
+            padding: 30px; border-radius: 20px; width: 500px; max-width: 90%;
+            text-align: center; position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
 
-        #ta-upgrades-card { display: none; border-color: var(--danger); background: rgba(220, 38, 38, 0.05); }
-        #ta-btn { background: var(--danger); color: white; width: 100%; padding: 10px; border: none; border-radius: 6px; font-weight: 800; cursor: pointer; margin-top: 10px; display:none; }
+        /* True Ascension Panel (Hidden by default) */
+        #ta-trigger-panel {
+            position: absolute; bottom: 20px; width: 90%;
+            background: linear-gradient(45deg, #3f0e0e, #000);
+            border: 2px solid #ef4444; padding: 15px; border-radius: 12px;
+            display: none; animation: pulseRed 2s infinite;
+        }
+        @keyframes pulseRed { 0% {box-shadow:0 0 10px #f00;} 50% {box-shadow:0 0 25px #f00;} 100% {box-shadow:0 0 10px #f00;} }
 
-        /* Market */
-        .market-graph { height: 80px; display: flex; align-items: flex-end; gap: 2px; margin-bottom: 10px; }
-        .bar { flex: 1; background: var(--accent); opacity: 0.5; transition: height 0.5s; }
-        .bar.up { background: var(--success); opacity: 0.8; } .bar.down { background: var(--danger); opacity: 0.8; }
-        .market-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .m-btn { padding: 10px; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: bold; }
-        .buy-stk { background: var(--success); } .sell-stk { background: var(--danger); }
-        .m-btn:disabled { opacity: 0.3; }
+        /* Artifacts (New Content) */
+        .artifact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+        .artifact {
+            border: 1px solid #f59e0b; background: rgba(245, 158, 11, 0.1);
+            padding: 10px; border-radius: 8px; text-align: center; cursor: pointer;
+        }
+        .artifact:hover { background: rgba(245, 158, 11, 0.2); }
+        .artifact h4 { margin: 0 0 5px 0; color: #f59e0b; font-size: 0.9rem; }
+        .artifact p { margin: 0; font-size: 0.7rem; color: #ccc; }
 
-        /* Modals */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 99; }
-        .modal { background: var(--bg-panel); padding: 30px; border-radius: 12px; width: 300px; border: 1px solid var(--border); }
-        input { width: 100%; padding: 10px; background: var(--bg-app); border: 1px solid var(--border); color: white; margin: 10px 0; }
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
 
-        @media(max-width:768px){ body{flex-direction:column; overflow-y:auto} .sidebar{width:100%; flex-direction:row; padding:15px;} .stats-box, .clicker-container{display:none} }
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; height: auto; display: block; }
+            .panel { margin-bottom: 20px; height: auto; max-height: 500px; }
+            .center-panel { padding: 50px 0; }
+        }
     </style>
 </head>
 <body>
 
-<aside class="sidebar">
-    <div class="brand">PAISER<span>CLICKER</span></div>
-    <div class="stats-box">
-        <div style="font-size:0.8rem; color:#aaa">BALANCE</div>
-        <div class="stat-val" id="score">0</div>
-        <div style="font-size:0.8rem; margin-top:5px">PPC: <span id="ppc">1</span></div>
-        <div style="font-size:0.8rem">CPS: <span id="cps">0</span></div>
-    </div>
-    <div class="clicker-container"><button id="click-btn">CLICK</button></div>
-    <button style="background:none; border:1px solid #333; color:#aaa; padding:8px; cursor:pointer" onclick="User.logout()">Logout / Save</button>
-</aside>
+<canvas id="particle-canvas"></canvas>
 
-<main class="main-view">
+<header>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <h1>Paiser Clicker</h1>
+        <span id="ta-badge" style="background:#ef4444; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:bold; display:none;">TRUE ASCENSION</span>
+    </div>
+    <div class="header-controls">
+        <button onclick="ui.toggleModal('achievements-modal')">🏆 Achievements</button>
+        <button onclick="ui.toggleModal('settings-modal')">⚙️ Data</button>
+    </div>
+</header>
+
+<div class="main-grid">
     
-    <!-- Standard Upgrades -->
-    <div class="card">
-        <div class="card-header"><span>Infrastructure</span></div>
-        <div id="shop-list" class="upgrade-list"></div>
-    </div>
-
-    <!-- Ascension Tech (Unlockable) -->
-    <div class="card" id="ta-upgrades-card">
-        <div class="card-header"><span style="color:var(--danger)">Ascension Tech</span> <span style="font-size:0.8rem">TA: <span id="ta-count">0</span></span></div>
-        <div id="ta-shop-list" class="upgrade-list"></div>
-    </div>
-
-    <!-- Flux Dimension -->
-    <div class="card" id="flux-card">
-        <div class="card-header"><span style="color:var(--flux)">Flux Dimension</span> <span id="flux-bal">0 Flux</span></div>
-        <p style="font-size:0.8rem; color:#888; margin-bottom:10px">Generate Flux instead of Coins (-90% prod).</p>
-        <button id="flux-toggle" class="toggle-btn" onclick="Game.toggleFlux()">Enter Dimension</button>
-        <div id="flux-shop-list" class="upgrade-list" style="height:150px"></div>
-    </div>
-
-    <!-- Market -->
-    <div class="card">
-        <div class="card-header"><span style="color:var(--success)">Void Market</span> <span id="stock-count">Owned: 0</span></div>
-        <div style="font-size:1.5rem; font-weight:800; text-align:center" id="market-price">50 C</div>
-        <div class="market-graph" id="market-graph"></div>
-        <div class="market-btns">
-            <button class="m-btn buy-stk" id="btn-buy-stk" onclick="Market.buy()">BUY</button>
-            <button class="m-btn sell-stk" id="btn-sell-stk" onclick="Market.sell()">SELL</button>
+    <!-- LEFT: Skills & Stats -->
+    <div class="panel">
+        <div style="padding:15px; background:rgba(0,0,0,0.2); font-weight:bold; border-bottom:var(--glass-border)">
+            SYSTEM STATUS
         </div>
-    </div>
-
-    <!-- Evolution / Ascension -->
-    <div class="card">
-        <div class="card-header"><span style="color:#a855f7">Evolution</span> <span id="shard-bal">0 Shards</span></div>
-        <div class="upgrade-item">
-            <div><b>Evo Core</b> <small>x5 Base</small></div>
-            <button id="btn-evo" class="btn-buy" onclick="Game.buyEvo()">Buy (5)</button>
+        <div class="stats-container">
+            <div class="stat-row"><span>Output (PPC)</span> <span id="stat-ppc" class="stat-val">1.00</span></div>
+            <div class="stat-row"><span>Auto (CPS)</span> <span id="stat-cps" class="stat-val">0.00</span></div>
+            <div class="stat-row"><span>Evo Shards</span> <span id="stat-shards" class="stat-val" style="color:#f59e0b">0</span></div>
+            <div class="stat-row"><span>Ascensions</span> <span id="stat-ascensions" class="stat-val">0</span></div>
         </div>
-        <div style="margin-top:auto; padding-top:15px">
-            <div id="ascend-info" style="text-align:center; font-size:0.8rem; color:#888; margin-bottom:5px">Reach 10B</div>
-            <button id="btn-ascend" class="btn-buy" style="width:100%; background:#333" onclick="Game.ascend()">Prestige</button>
+
+        <div class="skills-section">
+            <h3 style="font-size:0.9rem; text-transform:uppercase; color:var(--text-muted); margin-top:0;">Active Skills</h3>
+            <div id="skills-list"></div>
             
-            <!-- TRUE ASCENSION TRIGGER -->
-            <div id="ta-trigger" style="display:none; margin-top:15px; text-align:center; border-top:1px solid var(--danger); padding-top:10px;">
-                <b style="color:var(--danger)">INFINITY REACHED</b>
-                <p style="font-size:0.7rem; color:#888">Hard Mode Reset (500x Costs)</p>
-                <button id="ta-btn" style="display:block" onclick="Game.trueAscend()">TRUE ASCEND</button>
+            <h3 style="font-size:0.9rem; text-transform:uppercase; color:var(--text-muted); margin-top:20px;">Artifacts (Perm)</h3>
+            <div id="artifacts-list" class="artifact-grid">
+                <!-- Populated by JS -->
             </div>
         </div>
     </div>
 
-</main>
+    <!-- CENTER: Game -->
+    <div class="panel center-panel">
+        <div id="score-display">0</div>
+        <div class="currency-label">Quantum Coins</div>
 
-<div id="auth-modal" class="modal-overlay" style="display:flex">
+        <div id="click-btn"></div>
+
+        <div id="message-box" style="margin-top:30px; height:20px; color:var(--text-muted); font-style:italic; font-size:0.9rem;">
+            Initialize protocol...
+        </div>
+
+        <!-- Infinity Trigger -->
+        <div id="ta-trigger-panel">
+            <h3 style="color:#ef4444; margin:0;">⚠️ INFINITY REACHED ⚠️</h3>
+            <p style="font-size:0.8rem; margin:5px 0;">Reality is breaking. Perform True Ascension?</p>
+            <button onclick="game.triggerTrueAscension()" style="background:#ef4444; color:white; border:none; padding:8px 20px; border-radius:5px; font-weight:bold; cursor:pointer; width:100%;">ASCEND (Reset All)</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: Upgrades -->
+    <div class="panel">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="ui.switchTab('standard')">Basic</button>
+            <button class="tab-btn" onclick="ui.switchTab('advanced')">Synergy</button>
+            <button class="tab-btn" onclick="ui.switchTab('ascension')">Ascension</button>
+        </div>
+        <div id="upgrades-container" class="upgrades-list">
+            <!-- Populated by JS -->
+        </div>
+        
+        <div style="padding:15px; border-top:var(--glass-border); text-align:center;">
+            <button id="ascend-btn" onclick="game.ascend()" disabled style="width:100%; padding:12px; background:var(--secondary); color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:not-allowed; opacity:0.5;">
+                Ascend (Requires 10B)
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<div id="achievements-modal" class="modal-overlay" onclick="if(event.target===this) ui.toggleModal('achievements-modal')">
     <div class="modal">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Codename">
-        <button class="btn-buy afford" style="width:100%; padding:10px" onclick="User.login()">Start</button>
+        <h2>Achievements</h2>
+        <div id="achievements-list" style="max-height:300px; overflow-y:auto; text-align:left;"></div>
+        <button onclick="ui.toggleModal('achievements-modal')" style="margin-top:15px; padding:8px 20px; background:transparent; border:1px solid #555; color:#fff; border-radius:5px; cursor:pointer;">Close</button>
+    </div>
+</div>
+
+<div id="settings-modal" class="modal-overlay" onclick="if(event.target===this) ui.toggleModal('settings-modal')">
+    <div class="modal">
+        <h2>Data Management</h2>
+        <p style="font-size:0.9rem; color:#aaa;">Your progress is saved automatically.</p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button onclick="game.exportSave()" style="padding:10px; background:#333; border:1px solid #555; color:#fff; border-radius:5px; cursor:pointer;">Export Save</button>
+            <button onclick="game.importSave()" style="padding:10px; background:#333; border:1px solid #555; color:#fff; border-radius:5px; cursor:pointer;">Import Save</button>
+            <button onclick="game.hardReset()" style="padding:10px; background:#ef4444; border:1px solid #500; color:#fff; border-radius:5px; cursor:pointer;">Hard Reset</button>
+        </div>
+        <textarea id="save-output" style="width:100%; height:60px; margin-top:15px; background:#000; color:#0f0; font-size:10px;" readonly></textarea>
+    </div>
+</div>
+
+<div id="offline-modal" class="modal-overlay">
+    <div class="modal">
+        <h2 style="color:var(--secondary)">Welcome Back!</h2>
+        <p>While you were in the void, your automated systems generated:</p>
+        <h1 id="offline-gain" style="color:#fff;">0</h1>
+        <p>Coins</p>
+        <button onclick="document.getElementById('offline-modal').style.display='none'" style="padding:10px 30px; background:var(--primary); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">Collect</button>
     </div>
 </div>
 
 <script>
-/* CONFIG */
-const CFG = { tick: 100, ascReq: 1e10, infCap: 1e300 };
-let D = { score:0, flux:0, shards:0, stocks:0, evoLvl:0, ta:0, ups:[0,0,0,0,0,0], fluxUps:[0,0], taUps:[0,0] };
-let fluxActive = false;
+/**
+ * PAISER CLICKER - LOGIC ENGINE
+ */
 
-/* DATA */
-const UPS = [
-    { name:'Cursor', base:15, val:1, type:'ppc' },
-    { name:'Auto-Clicker', base:100, val:1, type:'cps' },
-    { name:'Server Farm', base:2000, val:20, type:'cps' },
-    { name:'AI Core', base:50000, val:200, type:'cps' },
-    { name:'Dyson Sphere', base:1e15, val:10, type:'dyson' },
-    { name:'Omega Node', base:1e21, val:500, type:'dyson' }
-];
-const FLUX_UPS = [
-    { name:'Flux Capacitor', base:10, val:1.5 },
-    { name:'Time Dilator', base:50, val:2.0 }
-];
-// THE MISSING ASCENSION UPGRADES RESTORED
-const TA_UPS = [
-    { name:'Dark Matter Engine', base:1e12, val:1000, desc:'x1000 Global' },
-    { name:'Void Siphon', base:1e20, val:10000, desc:'x10000 Global' }
-];
-
-/* MARKET LOGIC */
-const Market = {
-    price: 50, history: [50,50,50,50,50,50,50,50], tick:0,
-    update() {
-        this.tick++; if(this.tick<20) return; this.tick=0;
-        this.price = Math.max(10, Math.min(500, this.price + (Math.random()-0.5)*20));
-        this.history.push(this.price); if(this.history.length>8) this.history.shift();
-        this.render();
-    },
-    render() {
-        document.getElementById('market-price').innerText = Math.floor(this.price) + ' C';
-        document.getElementById('market-graph').innerHTML = this.history.map(p=>`<div class="bar ${p>=this.history[0]?'up':'down'}" style="height:${(p/500)*100}%"></div>`).join('');
-    },
-    buy() { if(D.score>=this.price){ D.score-=this.price; D.stocks++; UI.update(); } },
-    sell() { if(D.stocks>0){ D.score+=this.price; D.stocks--; UI.update(); } }
+const CONSTANTS = {
+    INFINITY: 1e300,
+    ASCENSION_REQ: 1e10,
+    SHARD_RATE: 0.1 // 10% bonus per shard
 };
 
-/* CORE */
-function getCost(def, count, mode) {
-    let cost = def.base * Math.pow(1.5, count);
-    // Hard Mode Logic
-    if(mode !== 'flux' && D.ta > 0) cost *= (def.type==='dyson' || mode==='ta') ? 500 : 5;
-    return cost;
-}
-
-function calc() {
-    let ppc=1, cps=0;
-    UPS.forEach((u,i) => { if(u.type==='ppc') ppc+=u.val*D.ups[i]; if(u.type==='cps') cps+=u.val*D.ups[i]; });
+// --- Data Definitions ---
+const UPGRADES = [
+    // Basic (Tab: Standard)
+    { id: 'cursor', name: 'Enhanced Cursor', cost: 15, baseVal: 1, type: 'ppc', tab: 'standard', icon: '👆' },
+    { id: 'cpu', name: 'Quantum CPU', cost: 100, baseVal: 5, type: 'ppc', tab: 'standard', icon: '💾' },
+    { id: 'farm', name: 'Server Farm', cost: 500, baseVal: 5, type: 'cps', tab: 'standard', icon: '🔋' },
+    { id: 'mine', name: 'Data Mine', cost: 2000, baseVal: 20, type: 'cps', tab: 'standard', icon: '⛏️' },
+    { id: 'factory', name: 'Robot Factory', cost: 10000, baseVal: 100, type: 'cps', tab: 'standard', icon: '🏭' },
+    { id: 'bank', name: 'Offshore Bank', cost: 50000, baseVal: 400, type: 'cps', tab: 'standard', icon: '🏛️' },
     
-    let evo = (D.ta>0) ? 1.5 : Math.pow(5, D.evoLvl);
-    let fluxM = 1; FLUX_UPS.forEach((u,i)=> fluxM *= Math.pow(u.val, D.fluxUps[i]));
-    let dysonM = 1; UPS.forEach((u,i)=> { if(u.type==='dyson') dysonM *= Math.pow(u.val, D.ups[i]); });
-    let taM = 1; TA_UPS.forEach((u,i)=> taM *= Math.pow(u.val, D.taUps[i]));
+    // Synergy / Advanced (Tab: Advanced) - Unlocks mid-game
+    { id: 'syn_click', name: 'Click Synergy', cost: 1e6, baseVal: 0, type: 'synergy', tab: 'advanced', icon: '⚡', desc: 'Clicking adds 1% of CPS' },
+    { id: 'flux', name: 'Flux Capacitor', cost: 5e6, baseVal: 2000, type: 'cps', tab: 'advanced', icon: '🔮' },
+    { id: 'dyson_s', name: 'Dyson Sphere', cost: 1e9, baseVal: 10000, type: 'cps', tab: 'advanced', icon: '🌞' },
+    { id: 'ai_god', name: 'AI Overlord', cost: 1e12, baseVal: 100000, type: 'cps', tab: 'advanced', icon: '🤖' },
 
-    let tPPC = ppc * evo * fluxM * dysonM * taM;
-    let tCPS = cps * evo * fluxM * dysonM * taM;
-    
-    if(fluxActive) { tPPC*=0.1; tCPS*=0.1; }
-    return { ppc:tPPC, cps:tCPS };
-}
+    // Ascension (Tab: Ascension) - Only buys with Shards or Huge Coins
+    { id: 'shard_boost', name: 'Shard Amplifier', cost: 1e15, baseVal: 0, type: 'multiplier', tab: 'ascension', icon: '💎', desc: 'Doubles Global Production' },
+    { id: 'void_siphon', name: 'Void Siphon', cost: 1e20, baseVal: 1e6, type: 'cps', tab: 'ascension', icon: '⚫' }
+];
 
-const Game = {
-    buy(i, mode) {
-        let list, counts, res;
-        if(mode==='flux'){ list=FLUX_UPS; counts=D.fluxUps; res='flux'; }
-        else if(mode==='ta'){ list=TA_UPS; counts=D.taUps; res='score'; }
-        else { list=UPS; counts=D.ups; res='score'; }
-        
-        const cost = getCost(list[i], counts[i], mode);
-        if(D[res] >= cost) { D[res]-=cost; counts[i]++; UI.update(); }
-    },
-    toggleFlux() { fluxActive=!fluxActive; document.getElementById('flux-toggle').classList.toggle('active', fluxActive); document.getElementById('flux-card').classList.toggle('active', fluxActive); },
-    buyEvo() { if(D.ta===0 && D.shards>=5){ D.shards-=5; D.evoLvl++; UI.update(); } },
-    ascend() {
-        if(D.score<CFG.ascReq) return;
-        D.shards += Math.floor(Math.sqrt(D.score/CFG.ascReq));
-        D.score=0; D.stocks=0; D.ups.fill(0);
-        fluxActive=false; Game.toggleFlux(); fluxActive=false;
-        UI.update();
-    },
-    trueAscend() {
-        if(D.score<CFG.infCap) return;
-        D.ta++; D.score=0; D.flux=0; D.shards=0; D.evoLvl=0; D.stocks=0;
-        D.ups.fill(0); D.fluxUps.fill(0); D.taUps.fill(0);
-        User.save(); location.reload();
-    },
-    tick() {
-        const s = calc();
-        D.score += s.cps * (CFG.tick/1000);
-        if(fluxActive && s.cps>0) D.flux += Math.sqrt(s.cps)*(CFG.tick/1000)/5;
-        
-        // Infinity Cap
-        if(D.ta===0 && D.score >= CFG.infCap) { D.score = CFG.infCap; document.getElementById('ta-trigger').style.display='block'; }
-        else document.getElementById('ta-trigger').style.display='none';
+const SKILLS = [
+    { id: 'overclock', name: 'Overclock', duration: 10, cooldown: 60, effect: 'cps_2x', desc: 'Double CPS for 10s' },
+    { id: 'midas', name: 'Midas Touch', duration: 0, cooldown: 120, effect: 'click_100x', desc: 'Next click worth 100x' },
+    { id: 'time_warp', name: 'Time Warp', duration: 0, cooldown: 300, effect: 'warp_30m', desc: 'Skip 30 mins instantly' }
+];
 
-        Market.update();
-        UI.update(s);
-    }
+const ARTIFACTS = [
+    { id: 'crit_chip', name: 'Crit Chip', cost: 5, desc: '10% chance for 5x Click', owned: false },
+    { id: 'comp_int', name: 'Compound Interest', cost: 10, desc: '+1% Coins per second (Cap)', owned: false },
+    { id: 'auto_click', name: 'Nano-Bots', cost: 20, desc: 'Auto-Click 5 times/sec', owned: false }
+];
+
+// --- Game State ---
+let state = {
+    score: 0,
+    totalScore: 0,
+    startTime: Date.now(),
+    lastSave: Date.now(),
+    evoShards: 0,
+    ascensions: 0,
+    trueAscensions: 0,
+    upgrades: {}, // { id: count }
+    artifacts: [],
+    skills: {}, // { id: lastUsedTime }
+    achievements: []
 };
 
-const UI = {
+// Initialize Upgrade Counts
+UPGRADES.forEach(u => state.upgrades[u.id] = 0);
+
+// --- Core System ---
+const game = {
+    ppc: 1,
+    cps: 0,
+    globalMult: 1,
+    loopId: null,
+    activeSkillMult: 1,
+
     init() {
-        const builder = (l, m, id) => document.getElementById(id).innerHTML = l.map((u,i)=>`
-            <div class="upgrade-item">
-                <div><b>${u.name}</b> <small>x${m==='flux'?D.fluxUps[i]:(m==='ta'?D.taUps[i]:D.ups[i])}</small><br><small id="${m}c${i}"></small></div>
-                <button id="${m}b${i}" class="btn-buy" onclick="Game.buy(${i}, '${m}')">Buy</button>
-            </div>`).join('');
-        builder(UPS, 'std', 'shop-list');
-        builder(FLUX_UPS, 'flux', 'flux-shop-list');
-        builder(TA_UPS, 'ta', 'ta-shop-list');
+        this.load();
+        this.startLoop();
+        ui.init();
+        this.checkOfflineProgress();
     },
-    fmt(n) { return n>=1e300 ? "∞" : (n<1000 ? Math.floor(n) : n.toExponential(2)); },
-    update(s) {
-        if(!s) s=calc();
-        document.getElementById('score').innerText = this.fmt(D.score);
-        document.getElementById('ppc').innerText = this.fmt(s.ppc);
-        document.getElementById('cps').innerText = this.fmt(s.cps);
-        document.getElementById('flux-bal').innerText = Math.floor(D.flux)+' Flux';
-        document.getElementById('shard-bal').innerText = D.shards+' Shards';
-        document.getElementById('stock-count').innerText = 'Owned: '+D.stocks;
-        document.getElementById('ta-count').innerText = D.ta;
 
-        // Update Buttons
-        const chk = (l, m, cts, res) => l.forEach((u,i)=>{
-            const c = getCost(u, cts[i], m);
-            document.getElementById(m+'c'+i).innerText = (m==='flux'?Math.floor(c):this.fmt(c)) + (m==='flux'?' Flux':' C');
-            const b = document.getElementById(m+'b'+i);
-            if(res>=c) b.classList.add('afford'); else b.classList.remove('afford');
-        });
-        chk(UPS, 'std', D.ups, D.score);
-        chk(FLUX_UPS, 'flux', D.fluxUps, D.flux);
-        chk(TA_UPS, 'ta', D.taUps, D.score);
-
-        // Special Buttons
-        const eb = document.getElementById('btn-evo');
-        if(D.ta>0){ eb.innerText="LOCKED (TA)"; eb.classList.remove('afford'); }
-        else { eb.classList.toggle('afford', D.shards>=5); }
-
-        const ab = document.getElementById('btn-ascend');
-        if(D.score>=CFG.ascReq) { ab.classList.add('afford'); document.getElementById('ascend-info').innerText = `Reward: ${Math.floor(Math.sqrt(D.score/CFG.ascReq))} Shards`; }
-        else { ab.classList.remove('afford'); document.getElementById('ascend-info').innerText = `Reach ${this.fmt(CFG.ascReq)}`; }
+    calculateStats() {
+        let ppc = 1;
+        let cps = 0;
         
-        document.getElementById('btn-buy-stk').disabled = D.score < Market.price;
-        document.getElementById('btn-sell-stk').disabled = D.stocks <= 0;
+        // 1. Base Calc
+        UPGRADES.forEach(u => {
+            const count = state.upgrades[u.id];
+            if (count > 0) {
+                if (u.type === 'ppc') ppc += u.baseVal * count;
+                if (u.type === 'cps') cps += u.baseVal * count;
+                if (u.type === 'multiplier') this.globalMult *= Math.pow(2, count);
+            }
+        });
 
-        if(D.ta>0) {
+        // 2. Synergy
+        if (state.upgrades['syn_click'] > 0) {
+            ppc += (cps * 0.01 * state.upgrades['syn_click']);
+        }
+
+        // 3. Artifacts
+        if (state.artifacts.includes('auto_click')) {
+            // Handled in loop
+        }
+
+        // 4. Evo Shard Bonus
+        let shardBonus = 1 + (state.evoShards * CONSTANTS.SHARD_RATE);
+        
+        // 5. True Ascension Scaling
+        if (state.trueAscensions > 0) {
+            shardBonus = 1 + (state.evoShards * 0.05); // Nerfed in TA
+            this.globalMult *= (state.trueAscensions * 2); // TA Bonus
+        }
+
+        this.ppc = ppc * shardBonus * this.globalMult;
+        this.cps = cps * shardBonus * this.globalMult;
+    },
+
+    click() {
+        let gain = this.ppc;
+        
+        // Critical Hit Artifact
+        let isCrit = false;
+        if (state.artifacts.includes('crit_chip') && Math.random() < 0.1) {
+            gain *= 5;
+            isCrit = true;
+        }
+
+        // Midas Skill
+        if (state.skills['midas'] === 'active') {
+            gain *= 100;
+            state.skills['midas'] = Date.now(); // Start cooldown
+            ui.renderSkills(); // Update visual state
+        }
+
+        this.addScore(gain);
+        ui.spawnFloater(gain, isCrit);
+        
+        // Particle Effect
+        const btn = document.getElementById('click-btn');
+        const rect = btn.getBoundingClientRect();
+        const x = rect.left + rect.width/2;
+        const y = rect.top + rect.height/2;
+        particles.explode(x, y, isCrit ? '#f59e0b' : null);
+    },
+
+    addScore(amount) {
+        if (state.score + amount >= CONSTANTS.INFINITY && state.trueAscensions === 0) {
+            state.score = CONSTANTS.INFINITY;
+            ui.showTATrigger();
+        } else {
+            state.score += amount;
+            state.totalScore += amount;
+        }
+        this.checkAchievements();
+    },
+
+    buyUpgrade(id) {
+        const u = UPGRADES.find(x => x.id === id);
+        const cost = this.getCost(u);
+        if (state.score >= cost) {
+            state.score -= cost;
+            state.upgrades[id]++;
+            this.calculateStats();
+            ui.update();
+        }
+    },
+
+    buyArtifact(id) {
+        const art = ARTIFACTS.find(a => a.id === id);
+        if (state.evoShards >= art.cost && !state.artifacts.includes(id)) {
+            state.evoShards -= art.cost;
+            state.artifacts.push(id);
+            this.calculateStats();
+            ui.renderSkills(); // Refresh artifacts list
+        }
+    },
+
+    activateSkill(id) {
+        const skill = SKILLS.find(s => s.id === id);
+        const lastUsed = state.skills[id] || 0;
+        const now = Date.now();
+
+        if (now - lastUsed >= skill.cooldown * 1000) {
+            // Activate
+            if (skill.effect === 'cps_2x') {
+                this.activeSkillMult = 2;
+                state.skills[id] = now; // Set activation time
+                setTimeout(() => { this.activeSkillMult = 1; }, skill.duration * 1000);
+            } else if (skill.effect === 'click_100x') {
+                state.skills[id] = 'active'; // Special flag
+            } else if (skill.effect === 'warp_30m') {
+                state.skills[id] = now;
+                this.addScore(this.cps * 1800);
+                ui.spawnFloater(this.cps * 1800, true);
+            }
+            ui.renderSkills();
+        }
+    },
+
+    getCost(u) {
+        let multiplier = 1.15;
+        // True Ascension makes game harder
+        if (state.trueAscensions > 0) multiplier = 1.5;
+        
+        return Math.floor(u.cost * Math.pow(multiplier, state.upgrades[u.id]));
+    },
+
+    loop() {
+        const now = Date.now();
+        const dt = (now - state.lastSave) / 1000; // Delta in seconds
+        
+        if (dt >= 0.1) { // Update every 100ms logic-wise for smoother rendering
+            let production = (this.cps * this.activeSkillMult) * dt;
+            
+            // Nano-bots artifact
+            if (state.artifacts.includes('auto_click')) {
+                production += (this.ppc * 5) * dt;
+            }
+
+            if (production > 0) this.addScore(production);
+            
+            state.lastSave = now;
+            ui.update();
+        }
+
+        // Auto-save every 5s
+        if (now % 5000 < 50) this.save();
+        
+        requestAnimationFrame(() => this.loop());
+    },
+
+    startLoop() {
+        this.loop();
+    },
+
+    ascend() {
+        if (state.score < CONSTANTS.ASCENSION_REQ) return;
+        const shardsEarned = Math.floor(Math.sqrt(state.score / CONSTANTS.ASCENSION_REQ));
+        
+        state.evoShards += shardsEarned;
+        state.ascensions++;
+        this.softReset();
+    },
+
+    triggerTrueAscension() {
+        if (confirm("Are you sure? This resets EVERYTHING for a permanent difficulty multiplier and bragging rights.")) {
+            state.trueAscensions++;
+            this.hardReset(true); // Keep TA stat
             document.body.classList.add('true-ascension-mode');
-            document.getElementById('ta-upgrades-card').style.display = 'flex';
+            document.getElementById('ta-badge').style.display = 'inline-block';
+            document.getElementById('ta-trigger-panel').style.display = 'none';
+        }
+    },
+
+    softReset() {
+        state.score = 0;
+        state.upgrades = {};
+        UPGRADES.forEach(u => state.upgrades[u.id] = 0);
+        // Skills reset
+        state.skills = {};
+        this.calculateStats();
+        ui.renderUpgrades();
+        this.save();
+    },
+
+    hardReset(keepTA = false) {
+        const ta = keepTA ? state.trueAscensions : 0;
+        state = {
+            score: 0, totalScore: 0, startTime: Date.now(), lastSave: Date.now(),
+            evoShards: 0, ascensions: 0, trueAscensions: ta,
+            upgrades: {}, artifacts: [], skills: {}, achievements: []
+        };
+        UPGRADES.forEach(u => state.upgrades[u.id] = 0);
+        this.calculateStats();
+        ui.init();
+        this.save();
+        if(!keepTA) location.reload();
+    },
+
+    checkAchievements() {
+        const list = [
+            {id: '1k', req: 1000, name: 'Kilo-Byte'},
+            {id: '1m', req: 1e6, name: 'Mega-Byte'},
+            {id: '1b', req: 1e9, name: 'Giga-Byte'},
+            {id: 'asc', req: () => state.ascensions > 0, name: 'Reborn'}
+        ];
+        
+        list.forEach(a => {
+            if (!state.achievements.includes(a.id)) {
+                let pass = typeof a.req === 'function' ? a.req() : state.totalScore >= a.req;
+                if (pass) {
+                    state.achievements.push(a.id);
+                    ui.spawnFloater(`🏆 ${a.name}`, true);
+                }
+            }
+        });
+    },
+
+    checkOfflineProgress() {
+        const now = Date.now();
+        if (state.lastSave && now - state.lastSave > 60000) { // 1 minute
+            const seconds = (now - state.lastSave) / 1000;
+            this.calculateStats();
+            const earned = this.cps * seconds;
+            if (earned > 10) {
+                state.score += earned;
+                document.getElementById('offline-gain').innerText = ui.format(earned);
+                document.getElementById('offline-modal').style.display = 'flex';
+            }
+        }
+    },
+
+    save() {
+        localStorage.setItem('paiserSave', JSON.stringify(state));
+    },
+
+    load() {
+        const d = localStorage.getItem('paiserSave');
+        if (d) {
+            const s = JSON.parse(d);
+            // Merge save to ensure new fields exist
+            state = { ...state, ...s };
+            // Ensure upgrades object has all keys
+            UPGRADES.forEach(u => { if(state.upgrades[u.id] === undefined) state.upgrades[u.id] = 0; });
+            
+            if (state.trueAscensions > 0) {
+                document.body.classList.add('true-ascension-mode');
+                document.getElementById('ta-badge').style.display = 'inline-block';
+            }
+        }
+        this.calculateStats();
+    },
+    
+    exportSave() {
+        document.getElementById('save-output').value = btoa(JSON.stringify(state));
+    },
+    
+    importSave() {
+        const str = prompt("Paste save code:");
+        if (str) {
+            try {
+                localStorage.setItem('paiserSave', atob(str));
+                location.reload();
+            } catch(e) { alert("Invalid save"); }
         }
     }
 };
 
-const User = {
-    login() {
-        const u = document.getElementById('username').value;
-        if(u){
-            const db = JSON.parse(localStorage.getItem('paiser_v3')||'{}');
-            if(db[u]) D = db[u];
-            // Fix Array Lengths if outdated
-            while(D.ups.length < UPS.length) D.ups.push(0);
-            while(D.fluxUps.length < FLUX_UPS.length) D.fluxUps.push(0);
-            if(!D.taUps) D.taUps = [0,0];
+// --- UI Controller ---
+const ui = {
+    currentTab: 'standard',
+    
+    init() {
+        this.renderUpgrades();
+        this.renderSkills();
+        document.getElementById('click-btn').addEventListener('mousedown', () => game.click());
+        
+        // Tab listeners
+        document.querySelectorAll('.tab-btn').forEach(b => {
+            b.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
+    },
+
+    switchTab(tab) {
+        this.currentTab = tab;
+        this.renderUpgrades();
+    },
+
+    format(n) {
+        if (n >= CONSTANTS.INFINITY) return "∞";
+        if (n < 1000) return Math.floor(n).toLocaleString();
+        const s = ['', 'k', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp'];
+        const e = Math.floor(Math.log10(n) / 3);
+        if (e >= s.length) return n.toExponential(2);
+        return (n / Math.pow(1000, e)).toFixed(2) + s[e];
+    },
+
+    update() {
+        document.getElementById('score-display').innerText = this.format(state.score);
+        document.getElementById('stat-ppc').innerText = this.format(game.ppc);
+        document.getElementById('stat-cps').innerText = this.format(game.cps);
+        document.getElementById('stat-shards').innerText = state.evoShards;
+        document.getElementById('stat-ascensions').innerText = state.ascensions;
+
+        // Update Upgrades
+        UPGRADES.filter(u => u.tab === this.currentTab).forEach(u => {
+            const card = document.getElementById(`upg-${u.id}`);
+            if (card) {
+                const cost = game.getCost(u);
+                card.querySelector('.upgrade-cost').innerText = this.format(cost);
+                card.querySelector('.upgrade-count').innerText = state.upgrades[u.id];
+                if (state.score >= cost) card.classList.add('can-buy');
+                else card.classList.remove('can-buy');
+            }
+        });
+
+        // Update Skills Cooldowns
+        SKILLS.forEach(s => {
+            const last = state.skills[s.id];
+            const card = document.getElementById(`skill-${s.id}`);
+            if (!card) return;
             
-            document.getElementById('auth-modal').style.display='none';
-            UI.init(); setInterval(Game.tick, CFG.tick); setInterval(User.save, 5000);
+            if (last === 'active') {
+                card.classList.add('active-glow'); // Visual flair needed
+            } else {
+                const diff = (Date.now() - (last || 0)) / 1000;
+                const remaining = s.cooldown - diff;
+                const bar = card.querySelector('.skill-progress');
+                
+                if (remaining > 0) {
+                    card.classList.add('cooldown');
+                    const pct = (remaining / s.cooldown) * 100;
+                    bar.style.width = pct + '%';
+                } else {
+                    card.classList.remove('cooldown');
+                    bar.style.width = '0%';
+                }
+            }
+        });
+        
+        // Ascend Button
+        const abtn = document.getElementById('ascend-btn');
+        if (state.score >= CONSTANTS.ASCENSION_REQ) {
+            abtn.disabled = false;
+            abtn.style.opacity = 1;
+            const shards = Math.floor(Math.sqrt(state.score / CONSTANTS.ASCENSION_REQ));
+            abtn.innerText = `ASCEND (+${shards} Shards)`;
+        } else {
+            abtn.disabled = true;
+            abtn.style.opacity = 0.5;
+            abtn.innerText = "Ascend (Requires 10B)";
         }
     },
-    save() { const u=document.getElementById('username').value; const db=JSON.parse(localStorage.getItem('paiser_v3')||'{}'); db[u]=D; localStorage.setItem('paiser_v3', JSON.stringify(db)); },
-    logout() { this.save(); location.reload(); }
+
+    renderUpgrades() {
+        const container = document.getElementById('upgrades-container');
+        container.innerHTML = '';
+        
+        UPGRADES.filter(u => u.tab === this.currentTab).forEach(u => {
+            const div = document.createElement('div');
+            div.className = 'upgrade-card';
+            div.id = `upg-${u.id}`;
+            div.onclick = () => game.buyUpgrade(u.id);
+            div.innerHTML = `
+                <div class="upgrade-icon">${u.icon}</div>
+                <div class="upgrade-details">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span class="upgrade-name">${u.name}</span>
+                        <span class="upgrade-count">${state.upgrades[u.id]}</span>
+                    </div>
+                    <div class="upgrade-desc">${u.desc || (u.type==='ppc' ? `+${u.baseVal} PPC` : `+${u.baseVal} CPS`)}</div>
+                    <div class="upgrade-cost">${this.format(game.getCost(u))}</div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    },
+
+    renderSkills() {
+        const sList = document.getElementById('skills-list');
+        sList.innerHTML = '';
+        SKILLS.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'skill-card';
+            div.id = `skill-${s.id}`;
+            div.onclick = () => game.activateSkill(s.id);
+            div.innerHTML = `
+                <div class="skill-header">
+                    <span>${s.name}</span>
+                    <span style="font-size:0.7rem; opacity:0.7">${s.cooldown}s</span>
+                </div>
+                <div class="skill-desc">${s.desc}</div>
+                <div class="skill-progress"></div>
+            `;
+            sList.appendChild(div);
+        });
+
+        const aList = document.getElementById('artifacts-list');
+        aList.innerHTML = '';
+        ARTIFACTS.forEach(a => {
+            const owned = state.artifacts.includes(a.id);
+            const div = document.createElement('div');
+            div.className = 'artifact';
+            if (owned) div.style.borderColor = '#10b981';
+            div.onclick = () => game.buyArtifact(a.id);
+            div.innerHTML = `
+                <h4>${a.name} ${owned ? '✅' : ''}</h4>
+                <p>${a.desc}</p>
+                ${!owned ? `<div style="margin-top:5px; font-weight:bold; color:#fff">${a.cost} Shards</div>` : ''}
+            `;
+            aList.appendChild(div);
+        });
+    },
+
+    spawnFloater(text, isCrit) {
+        const btn = document.getElementById('click-btn');
+        const rect = btn.getBoundingClientRect();
+        
+        // Randomize position slightly
+        const x = rect.left + rect.width/2 + (Math.random()*60 - 30);
+        const y = rect.top + rect.height/2;
+
+        const el = document.createElement('div');
+        el.className = 'float-text';
+        el.innerText = typeof text === 'number' ? `+${this.format(text)}` : text;
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        
+        if(isCrit) {
+            el.style.color = '#f59e0b';
+            el.style.fontSize = '1.5rem';
+            el.style.textShadow = '0 0 10px #f59e0b';
+        }
+
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    },
+    
+    showTATrigger() {
+        document.getElementById('ta-trigger-panel').style.display = 'block';
+    },
+
+    toggleModal(id) {
+        const m = document.getElementById(id);
+        m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        if (id === 'achievements-modal') this.renderAchievements();
+    },
+
+    renderAchievements() {
+        const list = document.getElementById('achievements-list');
+        list.innerHTML = state.achievements.map(id => `<div style="padding:5px; border-bottom:1px solid #333">🏆 ${id}</div>`).join('');
+    }
 };
 
-document.getElementById('click-btn').onmousedown = () => { D.score+=calc().ppc; UI.update(); document.getElementById('click-btn').style.transform='scale(0.95)'; setTimeout(()=>document.getElementById('click-btn').style.transform='scale(1)',50); };
+// --- Particles System ---
+const particles = {
+    canvas: document.getElementById('particle-canvas'),
+    ctx: document.getElementById('particle-canvas').getContext('2d'),
+    items: [],
+    
+    init() {
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        this.animate();
+    },
+    
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    },
+    
+    explode(x, y, color) {
+        for(let i=0; i<15; i++) {
+            this.items.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                life: 1,
+                color: color || `hsl(${Math.random()*360}, 70%, 50%)`
+            });
+        }
+    },
+    
+    animate() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.items.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.02;
+            p.vy += 0.2; // Gravity
+            
+            this.ctx.globalAlpha = p.life;
+            this.ctx.fillStyle = p.color;
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+            this.ctx.fill();
+            
+            if(p.life <= 0) this.items.splice(index, 1);
+        });
+        
+        requestAnimationFrame(() => this.animate());
+    }
+};
+
+// Start
+particles.init();
+game.init();
+
 </script>
 </body>
 </html>
