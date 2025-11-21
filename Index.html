@@ -3,426 +3,570 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paiser Clicker - True Ascension</title>
+    <title>Paiser Clicker: Neon Edition</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Rajdhani:wght@500;700;900&display=swap');
 
         :root {
-            --bg-grad-start: #2d1b4e;
-            --bg-grad-end: #0d0d12;
-            --accent: #a855f7;
-            --accent-glow: rgba(168, 85, 247, 0.4);
-            --text-main: #e0e0e0;
+            /* Default Theme (Purple/Cyberpunk) */
+            --bg-dark: #050507;
+            --bg-light: #1a1025;
+            --accent: #a855f7; /* Purple */
+            --accent-glow: rgba(168, 85, 247, 0.6);
+            --accent-dim: rgba(168, 85, 247, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --glass: rgba(20, 20, 30, 0.75);
+            --border: rgba(255, 255, 255, 0.1);
+            --success: #4ade80;
+            --gold: #fbbf24;
         }
 
+        /* True Ascension Theme (Red/Nightmare) */
         body.true-ascension-mode {
-            --bg-grad-start: #3f0e0e;
-            --bg-grad-end: #000000;
-            --accent: #ef4444;
-            --accent-glow: rgba(239, 68, 68, 0.4);
+            --bg-dark: #0a0000;
+            --bg-light: #200505;
+            --accent: #ef4444; /* Red */
+            --accent-glow: rgba(239, 68, 68, 0.6);
+            --accent-dim: rgba(239, 68, 68, 0.1);
+            --success: #ef4444; /* In hell, success is red */
         }
+
+        * { box-sizing: border-box; }
 
         body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            background: radial-gradient(circle at 50% 20%, var(--bg-grad-start) 0%, var(--bg-grad-end) 80%);
-            background-attachment: fixed;
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 0%, var(--bg-light) 0%, transparent 70%),
+                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .03) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .03) 75%, rgba(255, 255, 255, .03) 76%, transparent 77%),
+                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .03) 25%, rgba(255, 255, 255, .03) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .03) 75%, rgba(255, 255, 255, .03) 76%, transparent 77%);
+            background-size: 100% 100%, 50px 50px, 50px 50px;
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
-            text-align: center;
-            padding: 20px;
-            user-select: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow-x: hidden;
-            transition: background 1s ease;
+            transition: --accent 1s, background-color 1s;
         }
 
-        body::before {
-            content: "";
+        /* Scanline effect */
+        body::after {
+            content: " ";
+            display: block;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(255, 255, 255, 0.05)'/%3E%3C/svg%3E");
-            background-size: 4px 4px;
-            opacity: .3;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
             pointer-events: none;
-            z-index: -1;
         }
 
-        .game-container {
-            background: rgba(20, 20, 25, .75);
-            backdrop-filter: blur(16px);
-            padding: 40px;
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .6), 0 0 30px var(--accent-glow);
-            max-width: 90%;
-            width: 500px;
-            position: relative;
+        .app-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        /* Glass Container Style */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s;
+        }
+
+        /* Typography */
+        h1, h2, .stat-value { font-family: 'Rajdhani', sans-serif; text-transform: uppercase; }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            color: #fff;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px var(--accent);
-            letter-spacing: -1px;
-            white-space: nowrap;
+            margin: 0;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
         }
 
+        .top-bar-btns button {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        .top-bar-btns button:hover {
+            background: var(--accent-dim);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Score & Stats */
+        .score-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
         #score-display {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+            line-height: 1;
             margin-bottom: 5px;
-            color: #4ade80;
-            text-shadow: 0 0 15px rgba(74, 222, 128, .4);
-            transition: transform .1s;
-            white-space: nowrap; /* Prevents stacking */
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
-        body.true-ascension-mode #score-display {
-            color: #ef4444;
-            text-shadow: 0 0 15px rgba(239, 68, 68, .6);
-        }
 
         #stats-bar {
-            font-size: .95rem;
-            color: #9ca3af;
-            margin-bottom: 25px;
-            font-weight: 500;
-            white-space: nowrap;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
-        #message-box {
-            min-height: 30px;
-            font-size: 1.1rem;
-            font-style: italic;
-            color: #d8b4fe;
-            margin-bottom: 25px;
-            opacity: .9;
+        /* The Clicker Orb */
+        .orb-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            position: relative;
         }
 
         #click-button {
-            width: 100%;
-            padding: 22px;
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: #fff;
-            background: linear-gradient(135deg, var(--accent) 0%, #db2777 100%);
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
             border: none;
-            border-radius: 18px;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent),
+                        radial-gradient(circle at 50% 50%, var(--accent-dim), var(--bg-dark));
+            box-shadow: 
+                0 0 30px var(--accent-glow),
+                inset 0 0 20px var(--accent-glow),
+                0 0 0 4px rgba(255,255,255,0.1);
             cursor: pointer;
-            box-shadow: 0 10px 20px var(--accent-glow), inset 0 2px 0 rgba(255, 255, 255, .2);
-            transition: all .15s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 35px;
+            position: relative;
+            transition: transform 0.1s, box-shadow 0.2s;
+            z-index: 5;
+            overflow: hidden;
         }
 
-        #click-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px var(--accent-glow), inset 0 2px 0 rgba(255, 255, 255, .2);
+        /* Inner pulsing core */
+        #click-button::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60%; height: 60%;
+            background: var(--accent);
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.6;
+            animation: pulse 3s infinite ease-in-out;
+        }
+
+        #click-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        #click-button:hover::after {
+            opacity: 0.9;
+            filter: blur(25px);
+        }
+
+        /* Floating text text */
+        .orb-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Rajdhani';
+            font-weight: 900;
+            font-size: 1.5rem;
+            color: white;
+            letter-spacing: 2px;
+            pointer-events: none;
+            z-index: 6;
+            text-shadow: 0 2px 4px black;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+        }
+
+        /* Scrollable Lists */
+        .scroll-area {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+            margin-top: 10px;
         }
         
-        #click-button:active { transform: translateY(2px); }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; opacity: 0.5; }
 
-        .section-container {
-            border-top: 1px solid rgba(255, 255, 255, .1);
-            padding-top: 25px;
-            margin-bottom: 25px;
-        }
-
+        /* Upgrades */
         h2 {
-            font-size: 1.6rem;
-            color: #e9d5ff;
-            margin-bottom: 20px;
-            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 0;
         }
 
         .upgrade-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, .03);
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, .05);
-            transition: all .2s;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
         }
+
         .upgrade-item:hover {
-            background: rgba(255, 255, 255, .07);
-            transform: translateX(5px);
-            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.07);
+            border-color: var(--border);
+            transform: translateX(4px);
         }
 
-        .upgrade-info { text-align: left; overflow: hidden; }
-        .upgrade-name { font-weight: 700; color: #f3f4f6; font-size: 1.05rem; white-space: nowrap; }
-        .upgrade-stats { font-size: .85rem; color: #9ca3af; margin-top: 4px; white-space: nowrap; }
-
+        .upgrade-info { flex: 1; text-align: left; }
+        .upgrade-name { font-weight: 700; color: #fff; font-size: 0.95rem; }
+        .upgrade-stats { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        
         .upgrade-buy-button {
-            padding: 10px 18px;
-            font-weight: 700;
-            font-size: .9rem;
+            background: rgba(255,255,255,0.05);
+            color: #666;
             border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all .2s;
-            background-color: rgba(255, 255, 255, .1);
-            color: #d1d5db;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            cursor: not-allowed;
+            transition: all 0.3s;
             min-width: 80px;
         }
+
         .upgrade-buy-button.can-afford {
-            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(6, 182, 212, .3);
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--accent-dim);
+        }
+        .upgrade-buy-button.can-afford:hover {
+            box-shadow: 0 0 20px var(--accent-glow);
+            transform: scale(1.05);
         }
 
-        /* True Ascension Styles */
+        /* True Ascension Panel */
         #true-ascension-panel {
-            display: none; /* Hidden until Infinity */
-            background: linear-gradient(135deg, rgba(20,0,0,0.8), rgba(60,10,10,0.8));
-            border: 2px solid #ef4444;
-            padding: 20px;
-            border-radius: 16px;
+            display: none;
+            border: 1px solid #ef4444;
+            background: rgba(40, 0, 0, 0.8);
             margin-bottom: 20px;
-            animation: pulse-red 2s infinite;
+            animation: danger-pulse 2s infinite;
         }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 10px #ef4444; }
-            50% { box-shadow: 0 0 30px #ef4444; }
-            100% { box-shadow: 0 0 10px #ef4444; }
+        @keyframes danger-pulse {
+            0% { box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
+            50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); }
+            100% { box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
         }
+        
+        #true-ascend-btn {
+            background: #ef4444;
+            color: white;
+            width: 100%;
+            padding: 15px;
+            font-family: 'Rajdhani';
+            font-weight: 900;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 15px;
+        }
+        #true-ascend-btn:hover { background: #dc2626; box-shadow: 0 0 20px #ef4444; }
 
         .ta-badge {
             background: #ef4444;
             color: white;
-            padding: 4px 8px;
+            padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 5px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        /* Ascend Button (Standard) */
+        #ascend-button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background: linear-gradient(45deg, #7c3aed, #c026d3);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 700;
+            font-family: 'Rajdhani';
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        #ascend-button:not([disabled]) {
+            opacity: 1;
+            pointer-events: all;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
         }
 
         /* Modals */
         .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, .85);
-            backdrop-filter: blur(8px);
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(5px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 100;
         }
         .modal-content {
-            background: #18181b;
+            background: #101015;
             border: 1px solid var(--accent);
             padding: 30px;
             border-radius: 20px;
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
             text-align: center;
-            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a20;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-family: 'Inter';
+        }
+        .action-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-family: 'Rajdhani';
+            text-transform: uppercase;
+            font-size: 1.1rem;
         }
 
-        /* Achievement Notification */
+        /* Toast */
         #achievement-popup {
-            position: fixed;
-            bottom: 20px;
-            right: -300px;
-            background: #10b981;
+            position: fixed; bottom: 20px; right: -350px;
+            background: rgba(16, 185, 129, 0.9);
+            backdrop-filter: blur(10px);
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 2000;
+            padding: 15px 20px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 200;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         #achievement-popup.show { right: 20px; }
 
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.9rem;
-        }
-        .leaderboard-item.ta-player {
-            color: #ef4444;
-            font-weight: bold;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        /* Utilities */
+        .hidden { display: none !important; }
         
-        .header-btns button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #ccc;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-left: 5px;
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; }
+            #score-display { font-size: 2.5rem; }
+            #click-button { width: 160px; height: 160px; }
         }
-        .header-btns button:hover { border-color: var(--accent); color: var(--accent); }
     </style>
 </head>
 <body>
 
-<div class="game-container">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <h1 id="game-title">Paiser Clicker</h1>
-        <div class="header-btns">
-            <button id="achievements-btn">🏆</button>
-            <button id="leaderboard-btn">📊 Rank</button>
-            <button id="save-settings-btn">💾 Sync</button>
+    <div class="app-layout">
+        <!-- Header -->
+        <header>
+            <h1>Paiser Clicker</h1>
+            <div class="top-bar-btns">
+                <button id="achievements-btn" title="Achievements">🏆</button>
+                <button id="leaderboard-btn" title="Leaderboard">📊</button>
+                <button id="save-settings-btn" title="Sync/Save">💾</button>
+            </div>
+        </header>
+
+        <!-- Stats Section -->
+        <div class="glass-panel score-container">
+            <div id="true-ascension-display" style="display:none; margin-bottom:10px; color:#ef4444; font-weight:bold; font-family:'Rajdhani'; letter-spacing:1px;">
+                ⚠️ TRUE ASCENSION MODE <span id="ta-count-badge" class="ta-badge">TA: 0</span>
+            </div>
+            
+            <div id="score-display">0</div>
+            <div id="stats-bar">PPC: 1 | CPS: 0</div>
+        </div>
+
+        <!-- Clicker Area -->
+        <div class="orb-container">
+            <button id="click-button">
+                <span class="orb-text">CLICK</span>
+            </button>
+        </div>
+
+        <!-- True Ascension Trigger (Hidden by default) -->
+        <div id="true-ascension-panel" class="glass-panel">
+            <h2 style="color:#ef4444; border-color:#ef4444">∞ INFINITY REACHED ∞</h2>
+            <p style="font-size:0.9rem; color:#fca5a5; margin-bottom:15px; line-height:1.5;">
+                You have reached the limit of this reality. 
+                Perform a <strong>TRUE ASCENSION</strong>?
+            </p>
+            <ul style="text-align:left; font-size:0.85rem; color:#ddd; margin-bottom:15px; padding-left:20px;">
+                <li>RESET ALL Progress & Upgrades</li>
+                <li>Costs become <strong>500x Harder</strong></li>
+                <li>Evo Buff Nerfed to 1.5x</li>
+                <li>Unlocks Global Leaderboard Ranking</li>
+            </ul>
+            <button id="true-ascend-btn">True Ascend</button>
+        </div>
+
+        <!-- Ascension / Evo Section -->
+        <div class="glass-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
+                <h2 style="border:none; margin:0; color:#d8b4fe;">Evolution</h2>
+                <div id="shard-display" style="font-weight:bold; color:var(--accent);">Shards: 0</div>
+            </div>
+
+            <div class="upgrade-item">
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Evo Core Buff (<span id="evo-buff-level">0</span>)</div>
+                    <div class="upgrade-stats" id="evo-buff-desc" style="color:#c084fc">x5 Base Power</div>
+                </div>
+                <button id="buy-shard-upgrade" class="upgrade-buy-button">Buy (5)</button>
+            </div>
+
+            <div class="upgrade-item">
+                <div class="upgrade-info">
+                    <div class="upgrade-name" id="hyper-fusion-name">Hyper-Fusion Core</div>
+                    <div class="upgrade-stats" id="hyper-fusion-stats">x2 Global Multiplier</div>
+                </div>
+                <button id="hyper-fusion-buy" class="upgrade-buy-button">Buy</button>
+            </div>
+
+            <div style="margin-top:15px;">
+                <div id="ascend-info" style="font-size:0.8rem; color:#999; margin-bottom:5px; text-align:center;">Reach 10.0B Coins</div>
+                <button id="ascend-button" disabled>PRESTIGE</button>
+            </div>
+        </div>
+
+        <!-- True Ascension Upgrades (Hidden until unlocked) -->
+        <div id="ta-upgrades-container" class="glass-panel" style="display:none; border-color:#ef4444;">
+            <h2 style="color:#ef4444; border-color:rgba(239, 68, 68, 0.3)">Ascension Tech</h2>
+            <div id="ta-upgrades-list" class="scroll-area"></div>
+        </div>
+
+        <!-- Dyson & Standard Upgrades -->
+        <div class="glass-panel">
+            <h2 style="color:#fbbf24; border-color:rgba(251, 191, 36, 0.3)">Dyson Swarm</h2>
+            <div id="dyson-upgrades-list" class="scroll-area" style="max-height:200px;"></div>
+        </div>
+
+        <div class="glass-panel">
+            <h2>Standard Upgrades</h2>
+            <div id="shop-container" class="scroll-area"></div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="achievement-popup">
+        <div style="font-size:24px">🏆</div>
+        <div>
+            <div style="font-weight:bold">Achievement Unlocked!</div>
+            <div id="achievement-text" style="font-size:0.9rem; opacity:0.9"></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="leaderboard-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Global Leaderboard</h2>
+            <div id="leaderboard-list" style="max-height:300px; overflow-y:auto; background:#000; border-radius:8px; margin:15px 0; padding:10px;"></div>
+            <button class="action-btn" style="background:#333" onclick="document.getElementById('leaderboard-modal').style.display='none'">Close</button>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Identity Login</h2>
+            <input type="text" id="auth-username" placeholder="Enter Username" maxlength="15">
+            <button id="auth-submit-btn" class="action-btn" style="margin-bottom:20px;">Connect</button>
+            
+            <div style="border-top:1px solid #333; padding-top:20px;">
+                <p style="font-size:0.8rem; color:#666; margin-bottom:5px;">Cross-Device Save Code</p>
+                <textarea id="save-string" readonly style="width:100%; height:50px; background:#000; color:#0f0; border:1px solid #333; font-family:monospace; font-size:0.7rem; margin-bottom:10px;"></textarea>
+                <div style="display:flex; gap:10px;">
+                    <button id="copy-save-btn" class="action-btn" style="background:#333; font-size:0.9rem;">Copy</button>
+                    <button id="import-save-btn" class="action-btn" style="background:#ef4444; font-size:0.9rem;">Import</button>
+                </div>
+            </div>
+            <button id="close-auth" style="margin-top:20px; background:transparent; color:#666; border:none; cursor:pointer;">Close Window</button>
         </div>
     </div>
     
-    <!-- True Ascension Status -->
-    <div id="true-ascension-display" style="display:none; color:#ef4444; font-weight:bold; margin-bottom:10px;">
-        TRUE ASCENSION ACTIVE <span id="ta-count-badge" class="ta-badge">TA: 0</span>
-    </div>
-
-    <div id="score-display">0 Coins</div>
-    <div id="stats-bar">PPC: 1 | CPS: 0</div>
-    <div id="message-box">Click to start...</div>
-
-    <button id="click-button">CLICK ME</button>
-
-    <!-- True Ascension Trigger Panel -->
-    <div id="true-ascension-panel">
-        <h2 style="color:#ef4444; margin:0 0 10px 0;">∞ INFINITY REACHED ∞</h2>
-        <p style="font-size:0.9rem; color:#fca5a5; margin-bottom:15px;">
-            You have reached the limit of this reality. 
-            Perform a <strong>TRUE ASCENSION</strong>?
-        </p>
-        <ul style="text-align:left; font-size:0.85rem; color:#fff; margin-bottom:15px;">
-            <li>RESET ALL Progress, Upgrades, & Shards</li>
-            <li>Enemies (Costs) become <strong>500x Harder</strong></li>
-            <li>Evo Buff is PERMANENTLY Nerfed to 1.5x</li>
-            <li>Score Limit Removed (Go beyond Infinity)</li>
-            <li>Required for Global Leaderboard</li>
-        </ul>
-        <button id="true-ascend-btn" style="background:#ef4444; color:white; border:none; padding:15px; width:100%; font-weight:900; cursor:pointer; border-radius:8px;">TRUE ASCEND (Cost: Infinite Coins)</button>
-    </div>
-
-    <div id="ascension-container" class="section-container">
-        <h2>Evo Upgrades</h2>
-        <div id="shard-upgrades-container" style="border: 1px dashed var(--accent); padding:20px; border-radius:16px;">
-            <div id="shard-display">Evo Shards: 0</div>
-            
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <div>
-                    <div style="font-weight:700;color:#f3f4f6">Evo Core Buff (x<span id="evo-buff-level">0</span>)</div>
-                    <div style="font-size:.85rem;color:#d8b4fe" id="evo-buff-desc">Multiplies Base Power by x5</div>
-                </div>
-                <button id="buy-shard-upgrade" class="shard-upgrade-buy">Buy (5 Shards)</button>
-            </div>
-
-            <div id="hyper-fusion-item" style="display:flex;justify-content:space-between;align-items:center">
-                <div>
-                    <div style="font-weight:700;color:#f3f4f6" id="hyper-fusion-name">Hyper-Fusion Core</div>
-                    <div style="font-size:.85rem;color:#d8b4fe" id="hyper-fusion-stats">x2 Global Multiplier</div>
-                </div>
-                <button id="hyper-fusion-buy" class="shard-upgrade-buy">Buy</button>
-            </div>
+    <div id="achievements-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Trophies</h2>
+            <div id="achievements-list" style="text-align:left; max-height:300px; overflow-y:auto; margin-bottom:20px;"></div>
+            <button class="action-btn" style="background:#333" onclick="document.getElementById('achievements-modal').style.display='none'">Close</button>
         </div>
-        <div id="ascend-info">Reach 10.0B Coins to Ascend.</div>
-        <button id="ascend-button" disabled>ASCEND</button>
     </div>
-
-    <!-- Ascension Upgrades (Only visible after TA) -->
-    <div id="ta-upgrades-container" class="section-container" style="display:none; border-top:1px solid #ef4444;">
-        <h2 style="color:#ef4444">Ascension Tech</h2>
-        <div id="ta-upgrades-list"></div>
-    </div>
-
-    <div id="dyson-container" class="section-container">
-        <h2 style="color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.5)">Dyson Upgrades</h2>
-        <div id="dyson-upgrades-list"></div>
-    </div>
-
-    <div id="shop-container" class="section-container"></div>
-</div>
-
-<!-- Achievement Popup -->
-<div id="achievement-popup">
-    <div style="font-size:20px">🏆</div>
-    <div>
-        <div style="font-weight:bold">Achievement Unlocked!</div>
-        <div id="achievement-text" style="font-size:0.9rem">Details here</div>
-    </div>
-</div>
-
-<!-- Leaderboard Modal -->
-<div id="leaderboard-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Global Leaderboard</h2>
-        <p style="font-size:0.8rem; color:#9ca3af; margin-bottom:10px;">
-            *True Ascension required to rank.
-        </p>
-        <div id="leaderboard-list" style="max-height:300px; overflow-y:auto; background:rgba(0,0,0,0.3); border-radius:8px; margin-bottom:15px;"></div>
-        <button onclick="document.getElementById('leaderboard-modal').style.display='none'" style="background:#333; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Close</button>
-    </div>
-</div>
-
-<!-- Auth/Save Modal -->
-<div id="auth-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Player Profile</h2>
-        <div class="auth-form">
-            <input type="text" id="auth-username" placeholder="Username" maxlength="15" style="width:100%; padding:10px; margin-bottom:10px; background:#333; color:white; border:1px solid #555; border-radius:5px;">
-            <button id="auth-submit-btn" style="width:100%; padding:10px; background:var(--accent); color:white; border:none; border-radius:5px; font-weight:bold; cursor:pointer;">Set Name / Login</button>
-        </div>
-        <hr style="border-color:rgba(255,255,255,0.1); margin:20px 0;">
-        <h3>Cross-Device Sync</h3>
-        <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px;">To log in on another device, Copy the Save Code below and Import it there.</p>
-        <textarea id="save-string" readonly style="width:100%; height:60px; background:#111; color:#0f0; border:1px solid #333; font-size:0.7rem; margin-bottom:5px;"></textarea>
-        <div style="display:flex; gap:5px;">
-            <button id="copy-save-btn" style="flex:1; padding:8px; background:#333; color:white; border:none; border-radius:5px; cursor:pointer;">Copy Save</button>
-            <button id="import-save-btn" style="flex:1; padding:8px; background:#ef4444; color:white; border:none; border-radius:5px; cursor:pointer;">Import Save</button>
-        </div>
-        <button id="close-auth" style="margin-top:20px; background:transparent; border:1px solid #555; color:#aaa; padding:5px 15px; border-radius:5px; cursor:pointer;">Close</button>
-    </div>
-</div>
-
-<!-- Achievements Modal -->
-<div id="achievements-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Achievements</h2>
-        <div id="achievements-list" style="max-height:300px; overflow-y:auto; text-align:left;"></div>
-        <button onclick="document.getElementById('achievements-modal').style.display='none'" style="margin-top:15px; background:#333; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Close</button>
-    </div>
-</div>
 
 <script>
-    // --- Constants ---
+    // --- Game Constants ---
     const GAME_INTERVAL_MS = 50;
     const ASCENSION_COST = 1e10;
     const SHARD_MULTIPLIER = 0.1;
     const EVO_UPGRADE_1_COST = 5;
-    
-    // "Infinity" Threshold. JS Infinity is approx 1.79e308. 
-    // We set a threshold slightly lower to capture the event before math breaks completely.
     const INFINITY_THRESHOLD = 1e300; 
 
     // --- Game State ---
@@ -434,16 +578,15 @@
     let trueAscensions = 0;
     let earnedAchievements = [];
     
-    // --- Upgrades ---
-    // Added 'baseScale' to help with the 500x difficulty scaling
+    // --- Upgrades Data ---
     const UPGRADE_DEFINITIONS = [
         { id: 'hyper-fusion-core', name: 'Hyper-Fusion', baseCost: 5e17, costMultiplier: 10, count: 0, type: 'global-multiplier', value: 2, desc: 'x2 Global Multiplier' },
         
         // Dyson (Standard)
-        { id: 'dyson-sphere', name: 'Dyson Sphere', baseCost: 1e15, costMultiplier: 5, count: 0, type: 'dyson', value: 10, desc: 'x10 Production' },
-        { id: 'dyson-swarm', name: 'Dyson Swarm', baseCost: 5e16, costMultiplier: 6, count: 0, type: 'dyson', value: 25, desc: 'x25 Production' },
-        { id: 'dyson-net', name: 'Dyson Net', baseCost: 1e18, costMultiplier: 7, count: 0, type: 'dyson', value: 50, desc: 'x50 Production' },
-        { id: 'dyson-omega', name: 'Omega Dyson', baseCost: 1e21, costMultiplier: 10, count: 0, type: 'dyson', value: 500, desc: 'x500 Production' },
+        { id: 'dyson-sphere', name: 'Dyson Sphere', baseCost: 1e15, costMultiplier: 5, count: 0, type: 'dyson', value: 10, desc: 'x10 Prod' },
+        { id: 'dyson-swarm', name: 'Dyson Swarm', baseCost: 5e16, costMultiplier: 6, count: 0, type: 'dyson', value: 25, desc: 'x25 Prod' },
+        { id: 'dyson-net', name: 'Dyson Net', baseCost: 1e18, costMultiplier: 7, count: 0, type: 'dyson', value: 50, desc: 'x50 Prod' },
+        { id: 'dyson-omega', name: 'Omega Dyson', baseCost: 1e21, costMultiplier: 10, count: 0, type: 'dyson', value: 500, desc: 'x500 Prod' },
 
         // PPC
         { id: 'u-ppc-1', name: 'Enhanced Mouse', baseCost: 15, costMultiplier: 1.5, count: 0, type: 'ppc', value: 1, desc: '+1 PPC' },
@@ -470,26 +613,27 @@
         { id: 'u-cps-10', name: 'Eternal Return', baseCost: 5e11, costMultiplier: 2, count: 0, type: 'cps', value: 1e10, desc: '+10B CPS' }
     ];
 
-    // New Ascension Upgrades (Cost Coins, but only available if TA > 0)
     const TA_UPGRADE_DEFINITIONS = [
         { id: 'ta-dark-matter', name: 'Dark Matter Engine', baseCost: 1e12, costMultiplier: 4, count: 0, value: 1000, desc: 'Ascension Tech: x1000 Global' },
         { id: 'ta-void-siphon', name: 'Void Siphon', baseCost: 1e20, costMultiplier: 10, count: 0, value: 10000, desc: 'Ascension Tech: x10000 Global' }
     ];
 
     const ACHIEVEMENTS_LIST = [
-        { id: 'click-10', name: 'Finger Warmup', desc: 'Click 10 times manually', check: () => true }, // Logic handled in click handler
+        { id: 'click-10', name: 'Finger Warmup', desc: 'Click 10 times', check: () => true },
         { id: 'coins-1m', name: 'Millionaire', desc: 'Reach 1M Coins', check: () => score >= 1e6 },
         { id: 'ascend-1', name: 'Rebirth', desc: 'Perform an Ascension', check: () => evoShards > 0 },
-        { id: 'true-ascend', name: 'The Truth', desc: 'Perform a True Ascension', check: () => trueAscensions > 0 },
-        { id: 'infinity', name: 'Limitless', desc: 'Break the Infinity Barrier', check: () => score > INFINITY_THRESHOLD }
+        { id: 'true-ascend', name: 'The Truth', desc: 'True Ascend', check: () => trueAscensions > 0 },
+        { id: 'infinity', name: 'Limitless', desc: 'Break Infinity', check: () => score > INFINITY_THRESHOLD }
     ];
 
     // --- References ---
     const scoreDisplay = document.getElementById('score-display');
     const statsBar = document.getElementById('stats-bar');
     const clickButton = document.getElementById('click-button');
-    const messageBox = document.getElementById('message-box');
     const shopContainer = document.getElementById('shop-container');
+    const dysonContainer = document.getElementById('dyson-upgrades-list');
+    const taContainer = document.getElementById('ta-upgrades-container');
+    const taList = document.getElementById('ta-upgrades-list');
     const shardDisplay = document.getElementById('shard-display');
     const ascendButton = document.getElementById('ascend-button');
     const ascendInfo = document.getElementById('ascend-info');
@@ -498,17 +642,13 @@
     const trueAscendPanel = document.getElementById('true-ascension-panel');
     const trueAscendBtn = document.getElementById('true-ascend-btn');
 
-    // --- Helpers ---
-    
+    // --- Logic ---
     function calculateCost(u) {
         let cost = u.baseCost * Math.pow(u.costMultiplier, u.count);
-        // TRUE ASCENSION HARD MODE
         if (trueAscensions > 0) {
-            // Evo/Dyson/Fusion get 500x harder
             if (u.type === 'dyson' || u.id === 'hyper-fusion-core' || u.id.startsWith('ta-')) {
                 cost *= 500;
             } else {
-                // Normal upgrades get slightly harder (5x) to balance the high production
                 cost *= 5;
             }
         }
@@ -518,16 +658,11 @@
     function formatNumber(n) {
         if (n === Infinity || n >= 1.79e308) return "∞";
         if (n < 1000) return Math.floor(n).toFixed(0);
-        const suffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc', 'Ud', 'Dd', 'Td', 'Qad', 'Qid', 'Sxd', 'Spd', 'Ocd'];
+        const suffixes = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
         const t = Math.floor(Math.log10(n) / 3);
         if (t >= suffixes.length) return n.toExponential(2);
         return (n / Math.pow(1000, t)).toFixed(2) + suffixes[t];
     }
-
-    const messages = ["big friendly giant", "your ai no one likes you", "merchant", "Burger King bandit", "R.I.P CHAIR", "Rainy days...", "Neon lights..."];
-    function getRandomMessage() { return messages[Math.floor(Math.random() * messages.length)]; }
-
-    // --- Core Logic ---
 
     function updateStats() {
         let ppcBase = 1;
@@ -538,45 +673,37 @@
             if (u.type === 'cps') cpsBase += u.count * u.value;
         });
 
-        // Evo Buff Logic
         let evoMult;
         if (trueAscensions > 0) {
-            // NERFED IN TRUE ASCENSION
             evoMult = 1.5; 
-            document.getElementById('evo-buff-desc').textContent = "LOCKED at x1.5 (True Ascension Nerf)";
+            document.getElementById('evo-buff-desc').textContent = "LOCKED at x1.5 (TA Nerf)";
             document.getElementById('evo-buff-desc').style.color = "#ef4444";
         } else {
             evoMult = Math.pow(5, evoUpgrade1Count);
             document.getElementById('evo-buff-desc').textContent = "Multiplies Base Power by x5";
-            document.getElementById('evo-buff-desc').style.color = "#d8b4fe";
+            document.getElementById('evo-buff-desc').style.color = "#c084fc";
         }
 
         let tPpc = ppcBase * evoMult;
         let tCps = cpsBase * evoMult;
-
-        // Shard Bonus
         const shardMult = 1 + (evoShards * SHARD_MULTIPLIER);
         tPpc *= shardMult;
         tCps *= shardMult;
 
-        // Dyson
         UPGRADE_DEFINITIONS.filter(u => u.type === 'dyson').forEach(u => {
             tPpc *= Math.pow(u.value, u.count);
             tCps *= Math.pow(u.value, u.count);
         });
 
-        // Hyper Fusion
         const hUp = UPGRADE_DEFINITIONS.find(u => u.id === 'hyper-fusion-core');
         const hMul = Math.pow(2, hUp ? hUp.count : 0);
         tPpc *= hMul;
         tCps *= hMul;
 
-        // TA Upgrades
         if (trueAscensions > 0) {
             TA_UPGRADE_DEFINITIONS.forEach(u => {
-                const taMul = Math.pow(u.value, u.count);
-                tPpc *= taMul;
-                tCps *= taMul;
+                tPpc *= Math.pow(u.value, u.count);
+                tCps *= Math.pow(u.value, u.count);
             });
         }
 
@@ -585,12 +712,10 @@
     }
 
     function checkInfinityCap() {
-        // If True Ascension hasn't happened yet, cap at Infinity Threshold
         if (trueAscensions === 0 && score >= INFINITY_THRESHOLD) {
             score = INFINITY_THRESHOLD;
             trueAscendPanel.style.display = 'block';
         } else {
-            // Hide panel if we aren't at threshold (unless we just ascended, then score is 0)
             if (score < INFINITY_THRESHOLD) trueAscendPanel.style.display = 'none';
         }
     }
@@ -611,78 +736,67 @@
         setTimeout(() => pop.classList.remove('show'), 3000);
     }
 
-    // --- UI Construction ---
-
+    // --- UI Building ---
     function initShop() {
-        // Standard Shop
+        // Generators
         const stdUps = UPGRADE_DEFINITIONS.filter(u => u.id !== 'hyper-fusion-core' && u.type !== 'dyson');
-        shopContainer.innerHTML = `<h2>Upgrades</h2>` + stdUps.map(u => 
-            `<div class="upgrade-item">
-                <div class="upgrade-info">
-                    <div class="upgrade-name" id="name-${u.id}">${u.name} (x${u.count})</div>
-                    <div class="upgrade-stats" id="stats-${u.id}">${u.desc}</div>
-                </div>
-                <button id="btn-${u.id}" class="upgrade-buy-button" onclick="buyUpgrade('${u.id}')">Buy</button>
-            </div>`
-        ).join('');
+        shopContainer.innerHTML = stdUps.map(u => createUpgradeHTML(u, '')).join('');
 
-        // Dyson Shop
+        // Dyson
         const dysonUps = UPGRADE_DEFINITIONS.filter(u => u.type === 'dyson');
-        document.getElementById('dyson-upgrades-list').innerHTML = dysonUps.map(u => 
-            `<div class="upgrade-item" style="border-left:3px solid #fbbf24;background:rgba(251,191,36,.05)">
-                <div class="upgrade-info">
-                    <div class="upgrade-name" style="color:#fbbf24" id="name-${u.id}">${u.name} (x${u.count})</div>
-                    <div class="upgrade-stats" style="color:#fcd34d" id="stats-${u.id}">${u.desc}</div>
-                </div>
-                <button id="btn-${u.id}" class="upgrade-buy-button" onclick="buyUpgrade('${u.id}')">Buy</button>
-            </div>`
-        ).join('');
+        dysonContainer.innerHTML = dysonUps.map(u => createUpgradeHTML(u, 'color:#fbbf24')).join('');
 
-        // TA Shop
-        document.getElementById('ta-upgrades-list').innerHTML = TA_UPGRADE_DEFINITIONS.map(u => 
-             `<div class="upgrade-item" style="border-left:3px solid #ef4444;background:rgba(239, 68, 68,.1)">
-                <div class="upgrade-info">
-                    <div class="upgrade-name" style="color:#ef4444" id="name-${u.id}">${u.name} (x${u.count})</div>
-                    <div class="upgrade-stats" style="color:#fca5a5" id="stats-${u.id}">${u.desc}</div>
-                </div>
-                <button id="btn-${u.id}" class="upgrade-buy-button" onclick="buyTaUpgrade('${u.id}')">Buy</button>
-            </div>`
-        ).join('');
+        // TA
+        taList.innerHTML = TA_UPGRADE_DEFINITIONS.map(u => createUpgradeHTML(u, 'color:#ef4444')).join('');
 
-        // Bind special buttons
+        // Bind standard buys
+        [...UPGRADE_DEFINITIONS, ...TA_UPGRADE_DEFINITIONS].forEach(u => {
+             if (u.id !== 'hyper-fusion-core') {
+                 const btn = document.getElementById(`btn-${u.id}`);
+                 if(btn) btn.onclick = () => { 
+                    if(u.id.startsWith('ta')) buyTaUpgrade(u.id); else buyUpgrade(u.id); 
+                 };
+             }
+        });
+        
         document.getElementById('hyper-fusion-buy').onclick = () => buyUpgrade('hyper-fusion-core');
     }
 
+    function createUpgradeHTML(u, style) {
+        return `
+            <div class="upgrade-item">
+                <div class="upgrade-info">
+                    <div class="upgrade-name" style="${style}" id="name-${u.id}">${u.name} (x${u.count})</div>
+                    <div class="upgrade-stats" id="stats-${u.id}">${u.desc}</div>
+                </div>
+                <button id="btn-${u.id}" class="upgrade-buy-button">Buy</button>
+            </div>`;
+    }
+
     function updateUI() {
-        scoreDisplay.textContent = `${formatNumber(score)} Coins`;
+        scoreDisplay.textContent = formatNumber(score);
         statsBar.textContent = `PPC: ${formatNumber(ppc)} | CPS: ${formatNumber(cps)}`;
-        
-        shardDisplay.textContent = `Evo Shards: ${evoShards} (+${(evoShards * SHARD_MULTIPLIER * 100).toFixed(0)}% Bonus)`;
+        shardDisplay.textContent = `Shards: ${evoShards} (+${(evoShards * SHARD_MULTIPLIER * 100).toFixed(0)}%)`;
         evoBuffLevelSpan.textContent = trueAscensions > 0 ? "LOCKED" : evoUpgrade1Count;
 
-        // Theme switching
         if (trueAscensions > 0) {
             document.body.classList.add('true-ascension-mode');
             document.getElementById('true-ascension-display').style.display = 'block';
             document.getElementById('ta-count-badge').textContent = `TA: ${trueAscensions}`;
-            document.getElementById('ta-upgrades-container').style.display = 'block';
+            taContainer.style.display = 'block';
         } else {
             document.body.classList.remove('true-ascension-mode');
             document.getElementById('true-ascension-display').style.display = 'none';
-            document.getElementById('ta-upgrades-container').style.display = 'none';
+            taContainer.style.display = 'none';
         }
 
-        // Standard Ascension Button Logic
+        // Ascend Btn
         const shardsToGain = Math.floor(Math.sqrt(score / ASCENSION_COST));
         const canAscend = score >= ASCENSION_COST;
         ascendButton.disabled = !canAscend;
-        if (canAscend) {
-            ascendInfo.textContent = `Ascend for ${shardsToGain} Shards!`;
-        } else {
-            ascendInfo.textContent = `Reach ${formatNumber(ASCENSION_COST)} to Ascend.`;
-        }
+        ascendInfo.textContent = canAscend ? `Prestige now for ${shardsToGain} Shards` : `Reach ${formatNumber(ASCENSION_COST)} to Prestige`;
 
-        // Buy Buttons
+        // Update Buttons
         [...UPGRADE_DEFINITIONS, ...TA_UPGRADE_DEFINITIONS].forEach(u => {
             const btn = document.getElementById(`btn-${u.id}`);
             const name = document.getElementById(`name-${u.id}`);
@@ -690,71 +804,57 @@
             if (!btn) return;
 
             const cost = calculateCost(u);
-            const canAfford = score >= cost && score < Infinity; // Can't buy with Infinity directly unless handled
+            const canAfford = score >= cost && score < Infinity;
             
             if (name) name.textContent = `${u.name} (x${u.count})`;
-            if (stats) stats.textContent = `${u.desc} | Cost: ${formatNumber(cost)}`;
+            if (stats) stats.textContent = `${u.desc} | ${formatNumber(cost)}`;
             
             btn.disabled = !canAfford;
-            if (canAfford) btn.classList.add('can-afford');
-            else btn.classList.remove('can-afford');
+            if (canAfford) btn.classList.add('can-afford'); else btn.classList.remove('can-afford');
         });
 
-        // Hyper Fusion UI
+        // Hyper Fusion
         const hUp = UPGRADE_DEFINITIONS.find(u => u.id === 'hyper-fusion-core');
         const hCost = calculateCost(hUp);
         document.getElementById('hyper-fusion-name').textContent = `${hUp.name} (x${hUp.count})`;
-        document.getElementById('hyper-fusion-stats').textContent = `${hUp.desc} | Cost: ${formatNumber(hCost)}`;
+        document.getElementById('hyper-fusion-stats').textContent = `${hUp.desc} | ${formatNumber(hCost)}`;
         const hBtn = document.getElementById('hyper-fusion-buy');
         hBtn.disabled = score < hCost;
         if(score >= hCost) hBtn.classList.add('can-afford'); else hBtn.classList.remove('can-afford');
 
-        // Evo Upgrade Button (Disabled in TA)
+        // Evo
         if (trueAscensions > 0) {
             buyShardUpgradeButton.disabled = true;
-            buyShardUpgradeButton.textContent = "LOCKED (TA)";
+            buyShardUpgradeButton.textContent = "LOCKED";
         } else {
-            const cost = EVO_UPGRADE_1_COST; // Fixed cost logic from original
-            const canBuy = evoShards >= cost;
+            const canBuy = evoShards >= EVO_UPGRADE_1_COST;
             buyShardUpgradeButton.disabled = !canBuy;
-            buyShardUpgradeButton.textContent = canBuy ? `Buy (${cost} Shards)` : `Need ${cost - evoShards} Shards`;
+            buyShardUpgradeButton.textContent = canBuy ? `Buy (${EVO_UPGRADE_1_COST})` : `${EVO_UPGRADE_1_COST} Shards`;
+            if(canBuy) buyShardUpgradeButton.classList.add('can-afford'); else buyShardUpgradeButton.classList.remove('can-afford');
         }
     }
 
     // --- Actions ---
-
     function buyUpgrade(id) {
         const u = UPGRADE_DEFINITIONS.find(x => x.id === id);
         if (!u) return;
         const cost = calculateCost(u);
-        if (score >= cost) {
-            score -= cost;
-            u.count++;
-            updateStats();
-            updateUI();
-        }
+        if (score >= cost) { score -= cost; u.count++; updateStats(); updateUI(); }
     }
 
     function buyTaUpgrade(id) {
         const u = TA_UPGRADE_DEFINITIONS.find(x => x.id === id);
         if (!u) return;
         const cost = calculateCost(u);
-        if (score >= cost) {
-            score -= cost;
-            u.count++;
-            updateStats();
-            updateUI();
-        }
+        if (score >= cost) { score -= cost; u.count++; updateStats(); updateUI(); }
     }
 
     buyShardUpgradeButton.addEventListener('click', () => {
-        if (trueAscensions > 0) return; // Cant buy in TA
+        if (trueAscensions > 0) return;
         if (evoShards >= EVO_UPGRADE_1_COST) {
             evoShards -= EVO_UPGRADE_1_COST;
             evoUpgrade1Count++;
-            messageBox.textContent = "Evo Core Upgraded!";
-            updateStats();
-            updateUI();
+            updateStats(); updateUI();
         }
     });
 
@@ -762,290 +862,121 @@
         if (score < ASCENSION_COST) return;
         const shards = Math.floor(Math.sqrt(score / ASCENSION_COST));
         evoShards += shards;
-        
-        // Soft Reset
         score = 0;
         UPGRADE_DEFINITIONS.forEach(u => u.count = 0);
-        // TA upgrades persist across normal ascension? Usually yes.
-        
-        messageBox.textContent = `Ascended! +${shards} Shards`;
         if(!earnedAchievements.includes('ascend-1')) unlockAchievement(ACHIEVEMENTS_LIST.find(a=>a.id==='ascend-1'));
-        updateStats();
-        updateUI();
+        updateStats(); updateUI();
     });
 
     trueAscendBtn.addEventListener('click', () => {
         if (score < INFINITY_THRESHOLD) return;
-        
-        // True Ascension Reset
         trueAscensions++;
-        score = 0;
-        evoShards = 0;
-        evoUpgrade1Count = 0;
+        score = 0; evoShards = 0; evoUpgrade1Count = 0;
         UPGRADE_DEFINITIONS.forEach(u => u.count = 0);
-        TA_UPGRADE_DEFINITIONS.forEach(u => u.count = 0); // New set reset too? Or kept? Prompt says "resets all progress", implies everything.
-        
+        TA_UPGRADE_DEFINITIONS.forEach(u => u.count = 0);
         trueAscendPanel.style.display = 'none';
-        messageBox.textContent = "TRUE ASCENSION COMPLETE. WELCOME TO HELL.";
         if(!earnedAchievements.includes('true-ascend')) unlockAchievement(ACHIEVEMENTS_LIST.find(a=>a.id==='true-ascend'));
-        
-        updateStats();
-        updateUI();
-        saveGame();
+        updateStats(); updateUI(); saveGame();
     });
 
     clickButton.addEventListener('mousedown', (e) => {
-        e.preventDefault(); // Prevent double tap zoom
+        e.preventDefault();
         score += ppc;
-        messageBox.textContent = getRandomMessage();
         
-        // Click anim
-        scoreDisplay.style.transform = 'scale(1.05)';
-        setTimeout(() => scoreDisplay.style.transform = 'scale(1)', 50);
+        // Animation on text
+        const txt = document.querySelector('.orb-text');
+        txt.style.transform = 'translate(-50%, -50%) scale(1.2)';
+        setTimeout(() => txt.style.transform = 'translate(-50%, -50%) scale(1)', 100);
 
-        // Click achievement
         clickCount++;
-        if(clickCount >= 10 && !earnedAchievements.includes('click-10')) {
-            unlockAchievement(ACHIEVEMENTS_LIST.find(a=>a.id==='click-10'));
-        }
-
-        checkInfinityCap();
-        updateUI();
+        if(clickCount >= 10 && !earnedAchievements.includes('click-10')) unlockAchievement(ACHIEVEMENTS_LIST.find(a=>a.id==='click-10'));
+        checkInfinityCap(); updateUI();
     });
     let clickCount = 0;
 
-    // --- Systems ---
-
     function gameLoop() {
-        if (cps > 0) {
-            score += cps * (GAME_INTERVAL_MS / 1000);
-            checkInfinityCap();
-        }
-        checkAchievements();
-        updateUI();
+        if (cps > 0) { score += cps * (GAME_INTERVAL_MS / 1000); checkInfinityCap(); }
+        checkAchievements(); updateUI();
     }
 
-    // --- User & Save System ---
-    
+    // --- User System ---
     let currentUser = null;
     const users = JSON.parse(localStorage.getItem('paiserClickerUsers') || '{}');
 
     function saveGame() {
         if (!currentUser) return;
-        
-        const saveData = {
-            score, evoShards, evoUpgrade1Count, trueAscensions, earnedAchievements,
-            upgrades: UPGRADE_DEFINITIONS.map(u => ({ id: u.id, count: u.count })),
-            taUpgrades: TA_UPGRADE_DEFINITIONS.map(u => ({ id: u.id, count: u.count }))
-        };
-
-        users[currentUser] = {
-            password: users[currentUser].password,
-            data: saveData,
-            maxScore: Math.max(score === Infinity ? 1e308 : score, users[currentUser].maxScore || 0),
-            trueAscensions: trueAscensions // For leaderboard
-        };
-        
+        const saveData = { score, evoShards, evoUpgrade1Count, trueAscensions, earnedAchievements, upgrades: UPGRADE_DEFINITIONS.map(u=>({id:u.id, count:u.count})), taUpgrades: TA_UPGRADE_DEFINITIONS.map(u=>({id:u.id, count:u.count})) };
+        users[currentUser] = { password: users[currentUser].password, data: saveData, maxScore: Math.max(score === Infinity ? 1e308 : score, users[currentUser].maxScore || 0), trueAscensions: trueAscensions };
         localStorage.setItem('paiserClickerUsers', JSON.stringify(users));
         localStorage.setItem('paiserCurrentUser', currentUser);
-        
-        // Update Export String
-        const saveString = btoa(JSON.stringify(saveData));
-        document.getElementById('save-string').value = saveString;
+        document.getElementById('save-string').value = btoa(JSON.stringify(saveData));
     }
 
     function loadGame() {
         if (!currentUser || !users[currentUser]) return;
         const data = users[currentUser].data;
         if (!data) return;
-
         score = data.score || 0;
         evoShards = data.evoShards || 0;
         evoUpgrade1Count = data.evoUpgrade1Count || 0;
         trueAscensions = data.trueAscensions || 0;
         earnedAchievements = data.earnedAchievements || [];
-        
-        if (data.upgrades) {
-            data.upgrades.forEach(saved => {
-                const u = UPGRADE_DEFINITIONS.find(def => def.id === saved.id);
-                if (u) u.count = saved.count;
-            });
-        }
-        if (data.taUpgrades) {
-            data.taUpgrades.forEach(saved => {
-                const u = TA_UPGRADE_DEFINITIONS.find(def => def.id === saved.id);
-                if (u) u.count = saved.count;
-            });
-        }
+        if(data.upgrades) data.upgrades.forEach(s => { const d = UPGRADE_DEFINITIONS.find(x=>x.id===s.id); if(d) d.count=s.count; });
+        if(data.taUpgrades) data.taUpgrades.forEach(s => { const d = TA_UPGRADE_DEFINITIONS.find(x=>x.id===s.id); if(d) d.count=s.count; });
         updateStats();
     }
 
     document.getElementById('auth-submit-btn').addEventListener('click', () => {
         const username = document.getElementById('auth-username').value.trim();
         if (!username) return;
-        
-        if (!users[username]) {
-            users[username] = { password: 'default', data: null, maxScore: 0, trueAscensions: 0 };
-        }
-        currentUser = username;
-        loadGame();
-        document.getElementById('auth-modal').style.display = 'none';
-        startGame();
+        if (!users[username]) users[username] = { password: 'default', data: null, maxScore: 0, trueAscensions: 0 };
+        currentUser = username; loadGame(); document.getElementById('auth-modal').style.display = 'none'; startGame();
     });
 
-    document.getElementById('save-settings-btn').addEventListener('click', () => {
-        saveGame();
-        document.getElementById('auth-modal').style.display = 'flex';
-    });
-
-    document.getElementById('close-auth').addEventListener('click', () => {
-        document.getElementById('auth-modal').style.display = 'none';
-    });
-    
-    // Import/Export
-    document.getElementById('copy-save-btn').addEventListener('click', () => {
-        const txt = document.getElementById('save-string');
-        txt.select();
-        navigator.clipboard.writeText(txt.value);
-        alert("Save copied to clipboard!");
-    });
+    document.getElementById('save-settings-btn').addEventListener('click', () => { saveGame(); document.getElementById('auth-modal').style.display = 'flex'; });
+    document.getElementById('close-auth').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'none');
+    document.getElementById('copy-save-btn').addEventListener('click', () => { navigator.clipboard.writeText(document.getElementById('save-string').value); alert("Copied!"); });
     
     document.getElementById('import-save-btn').addEventListener('click', () => {
-        const str = prompt("Paste save string:");
-        if(!str) return;
         try {
-            const data = JSON.parse(atob(str));
-            // Apply data
-            score = data.score;
-            evoShards = data.evoShards;
-            trueAscensions = data.trueAscensions;
-            // ... apply rest ...
-            // Simplified for brevity, usually you validate structure
-            alert("Save imported! (Refresh might be needed if logic differs)");
-            location.reload(); 
-        } catch(e) {
-            alert("Invalid Save String");
-        }
+            const data = JSON.parse(atob(prompt("Paste Save:")));
+            score = data.score; evoShards = data.evoShards; trueAscensions = data.trueAscensions;
+            updateStats(); updateUI(); alert("Loaded!");
+        } catch(e) { alert("Invalid Save"); }
     });
 
-    // --- Leaderboard ---
-    
-    function getLeaderboard() {
-        // Convert users object to array
-        const list = Object.keys(users).map(u => ({
-            name: u,
-            ta: users[u].trueAscensions || 0,
-            score: users[u].maxScore || 0
-        }));
-
-        // Sort: High TA first, then High Score
-        list.sort((a, b) => {
-            if (b.ta !== a.ta) return b.ta - a.ta;
-            return b.score - a.score;
-        });
-
-        return list;
-    }
-
     document.getElementById('leaderboard-btn').addEventListener('click', () => {
-        const list = getLeaderboard();
-        const container = document.getElementById('leaderboard-list');
-        container.innerHTML = '';
-        
-        if (list.length === 0) container.innerHTML = '<div style="padding:10px">No records found.</div>';
-
-        list.forEach((p, i) => {
-            // Check if player qualifies (Must have TA > 0 as per prompt, or at least be listed)
-            // Prompt: "you also have to get true ascension to get on the leader board"
-            if (p.ta === 0) return; 
-
-            const div = document.createElement('div');
-            div.className = 'leaderboard-item';
-            if (p.name === currentUser) div.classList.add('ta-player'); // Highlight self
-            div.innerHTML = `
-                <span>#${i+1} ${p.name}</span>
-                <span>TA: ${p.ta} | ${formatNumber(p.score)}</span>
-            `;
-            container.appendChild(div);
+        const list = Object.keys(users).map(u=>({name:u, ta:users[u].trueAscensions||0, score:users[u].maxScore||0})).sort((a,b) => (b.ta-a.ta) || (b.score-a.score));
+        const c = document.getElementById('leaderboard-list'); c.innerHTML = '';
+        list.forEach((p,i) => {
+            if (p.ta === 0) return;
+            const d = document.createElement('div');
+            d.style.padding = "8px"; d.style.borderBottom="1px solid #333";
+            d.innerHTML = `<span style="color:${p.name===currentUser?'var(--accent)':'#fff'}">#${i+1} ${p.name}</span> <span style="float:right; color:var(--accent)">TA: ${p.ta}</span>`;
+            c.appendChild(d);
         });
-
-        // If everyone was filtered out
-        if (container.children.length === 0) {
-            container.innerHTML = '<div style="padding:20px; color:#aaa">No True Ascended players yet. <br>Break the Infinity Barrier to rank.</div>';
-        }
-
+        if(!c.innerHTML) c.innerHTML = "<div style='color:#666; padding:10px'>No True Ascensions yet.</div>";
         document.getElementById('leaderboard-modal').style.display = 'flex';
     });
 
-    // --- Easter Eggs ---
-    // Konami Code
-    let kCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-    let kIdx = 0;
-    document.addEventListener('keydown', (e) => {
-        if (e.key === kCode[kIdx]) {
-            kIdx++;
-            if (kIdx === kCode.length) {
-                alert("CHEAT CODE ACTIVATED: +10 Shards");
-                evoShards += 10;
-                kIdx = 0;
-                updateUI();
-            }
-        } else {
-            kIdx = 0;
-        }
-    });
-
-    // Title Click Easter Egg
-    let titleClicks = 0;
-    document.getElementById('game-title').addEventListener('click', () => {
-        titleClicks++;
-        if(titleClicks === 10) {
-            alert("Stop poking the title!");
-            score += 1000;
-        }
-    });
-    
     document.getElementById('achievements-btn').addEventListener('click', () => {
-        const list = document.getElementById('achievements-list');
-        list.innerHTML = '';
+        const list = document.getElementById('achievements-list'); list.innerHTML = '';
         ACHIEVEMENTS_LIST.forEach(a => {
             const has = earnedAchievements.includes(a.id);
-            const div = document.createElement('div');
-            div.style.padding = "10px";
-            div.style.borderBottom = "1px solid #333";
-            div.style.opacity = has ? "1" : "0.5";
-            div.style.color = has ? "#4ade80" : "#aaa";
-            div.innerHTML = `<strong>${has ? '🏆' : '🔒'} ${a.name}</strong><br><span style="font-size:0.8rem">${a.desc}</span>`;
-            list.appendChild(div);
+            list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333; color:${has?'#4ade80':'#666'}"><strong>${has?'🏆':'🔒'} ${a.name}</strong><br><small>${a.desc}</small></div>`;
         });
         document.getElementById('achievements-modal').style.display = 'flex';
     });
 
-    // --- Init ---
     let gameInterval, saveInterval;
-
     function startGame() {
-        initShop();
-        updateStats();
-        updateUI();
-        
-        if (gameInterval) clearInterval(gameInterval);
-        gameInterval = setInterval(gameLoop, GAME_INTERVAL_MS);
-        
-        if (saveInterval) clearInterval(saveInterval);
-        saveInterval = setInterval(saveGame, 5000);
+        initShop(); updateStats(); updateUI();
+        if (gameInterval) clearInterval(gameInterval); gameInterval = setInterval(gameLoop, GAME_INTERVAL_MS);
+        if (saveInterval) clearInterval(saveInterval); saveInterval = setInterval(saveGame, 5000);
     }
 
-    // Check for existing login
     const savedUser = localStorage.getItem('paiserCurrentUser');
-    if (savedUser && users[savedUser]) {
-        currentUser = savedUser;
-        loadGame();
-        startGame();
-    } else {
-        document.getElementById('auth-modal').style.display = 'flex';
-    }
-
+    if (savedUser && users[savedUser]) { currentUser = savedUser; loadGame(); startGame(); } else { document.getElementById('auth-modal').style.display = 'flex'; }
 </script>
 </body>
 </html>
